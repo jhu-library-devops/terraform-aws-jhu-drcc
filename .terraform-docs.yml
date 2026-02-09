@@ -17,12 +17,6 @@ sections:
 content: |-
   {{ .Header }}
 
-  ## Usage
-
-  ```hcl
-  {{ include "examples/basic.tf" }}
-  ```
-
   {{ .Requirements }}
 
   {{ .Providers }}
