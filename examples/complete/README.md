@@ -7,6 +7,8 @@ This example demonstrates a complete DSpace deployment using all three modules:
 
 ## Architecture
 
+![AWS Architecture Diagram](https://lucid.app/publicSegments/view/901491ef-aa95-4759-a4d8-367bfd071b23/image.png)
+
 This configuration deploys:
 - VPC with public and private subnets across 3 availability zones
 - Application Load Balancer (public and private)
