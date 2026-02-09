@@ -30,8 +30,6 @@ jobs:
       - name: Generate module catalog
         run: |
           cat > /tmp/catalog.md << 'EOF'
-          ## Module Catalog
-
           | Module | Purpose | Dependencies |
           |--------|---------|--------------|
           EOF
@@ -63,16 +61,18 @@ jobs:
             echo "| [$module_name](./modules/$module_name/) | $description | $dependencies |" >> /tmp/catalog.md
           done
 
-          # Update README.md
+          # Update README.md - replace everything between the header and next section
           awk '
+            BEGIN { in_catalog=0; }
             /^## Module Catalog/ { 
-              print; 
+              print;
+              print "";
               while (getline < "/tmp/catalog.md") print;
-              skip=1;
+              in_catalog=1;
               next;
             }
-            /^## Getting Started/ { skip=0; }
-            !skip
+            /^## Getting Started/ { in_catalog=0; }
+            !in_catalog { print; }
           ' README.md > README.md.tmp
           
           mv README.md.tmp README.md
