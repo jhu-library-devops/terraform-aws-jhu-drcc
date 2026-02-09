@@ -1,22 +1,32 @@
 # JHU DRCC Terraform Modules
 
-Terraform modules for deploying the JHU Digital Research and Curation Center (DRCC) DSpace infrastructure on AWS.
+Terraform modules for deploying JHU Digital Research and Curation Center (DRCC) infrastructure on AWS.
 
 ## Overview
 
-This repository provides a modular approach to deploying DSpace 7+ on AWS using ECS Fargate, with optional Solr search cluster integration. The modules are designed for production use with high availability, monitoring, and security best practices.
+This repository provides reusable Terraform modules for deploying cloud infrastructure on AWS. While initially developed for DSpace 7+ deployments, the modules are designed to be flexible and reusable for other DRCC applications and services.
+
+The modules follow AWS best practices for high availability, monitoring, security, and cost optimization.
+
+## Module Philosophy
+
+The DRCC module library is built on three principles:
+
+1. **Separation of Concerns** - Foundation provides shared infrastructure, applications manage their own resources
+2. **Reusability** - Modules can be composed for different applications beyond DSpace
+3. **Production-Ready** - Built with monitoring, security, and operational best practices
 
 ## Architecture
 
-The infrastructure is organized into three main modules:
+The infrastructure is organized into three layers:
 
 ### 1. drcc-foundation
-**Shared infrastructure layer** - Provides the foundational AWS resources needed by all applications.
+**Shared infrastructure layer** - Provides foundational AWS resources that can be shared across multiple applications.
 
 **Resources:**
 - VPC with public and private subnets
 - Application Load Balancers (public and private)
-- RDS PostgreSQL database
+- RDS PostgreSQL database (optional)
 - ECS cluster (Fargate)
 - IAM roles and security groups
 - CloudWatch monitoring and alarms
@@ -24,7 +34,7 @@ The infrastructure is organized into three main modules:
 - CloudMap service discovery namespace
 - Route53 private hosted zone
 
-**Use when:** Setting up the base infrastructure for DSpace deployment.
+**Use when:** Setting up base infrastructure for any containerized application on AWS.
 
 ### 2. solr-search-cluster
 **Solr search application** - Deploys a highly available Solr cluster with Zookeeper coordination.
@@ -38,10 +48,10 @@ The infrastructure is organized into three main modules:
 - Service discovery for node coordination
 - Application Load Balancer target group and listener rules
 
-**Use when:** DSpace requires full-text search capabilities.
+**Use when:** Applications require full-text search capabilities with Apache Solr.
 
 ### 3. dspace-app-services
-**DSpace application layer** - Deploys the DSpace Angular UI, REST API, and background jobs.
+**DSpace application layer** - Deploys the DSpace repository application (Angular UI, REST API, and background jobs).
 
 **Resources:**
 - DSpace Angular UI ECS service
@@ -53,7 +63,19 @@ The infrastructure is organized into three main modules:
 - CloudWatch dashboards
 - Application Load Balancer target groups and listener rules
 
-**Use when:** Deploying the DSpace application.
+**Use when:** Deploying DSpace digital repository application.
+
+## Current Applications
+
+### DSpace Digital Repository
+The first application deployed using these modules is DSpace 7+, an open-source repository platform for digital collections. The combination of `drcc-foundation`, `solr-search-cluster`, and `dspace-app-services` provides a complete, production-ready DSpace deployment.
+
+### Future Applications
+The modular design allows for deploying other DRCC applications using the foundation module with custom application modules. Examples might include:
+- Custom web applications on ECS
+- Data processing pipelines
+- API services
+- Other repository platforms
 
 ## Module Catalog
 
