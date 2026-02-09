@@ -1,0 +1,49 @@
+name: Generate Terraform Documentation
+
+on:
+  pull_request:
+    paths:
+      - 'modules/**/*.tf'
+      - '.github/workflows/terraform-docs.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/**/*.tf'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  terraform-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Terraform docs
+        uses: terraform-docs/gh-actions@v1.2.0
+        with:
+          working-dir: .
+          output-file: README.md
+          output-method: inject
+          recursive: true
+          recursive-path: modules
+          git-push: true
+          git-commit-message: "docs: update Terraform module documentation"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📝 Terraform documentation has been automatically updated for all modules.'
+            })
