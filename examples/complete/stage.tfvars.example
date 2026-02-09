@@ -1,0 +1,34 @@
+# Basic Configuration
+organization  = "jhu"
+project_name  = "dspace"
+environment   = "stage"
+aws_region    = "us-east-1"
+public_domain = "dspace-stage.example.edu"
+
+# VPC Configuration
+vpc_cidr             = "10.1.0.0/16"
+public_subnet_cidrs  = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+private_subnet_cidrs = ["10.1.11.0/24", "10.1.12.0/24", "10.1.13.0/24"]
+
+# Database Configuration
+db_instance_class    = "db.t3.medium"
+db_allocated_storage = 100
+db_name              = "dspace"
+db_username          = "dspaceuser"
+db_multi_az          = false
+
+# Solr Configuration
+solr_node_count      = 3
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+solr_cpu             = "2048"
+solr_memory          = "4096"
+
+# DSpace Application Configuration
+dspace_angular_task_count = 2
+dspace_api_task_count     = 2
+
+# Optional: Use external task definitions
+# dspace_angular_task_def_arn = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-angular:1"
+# dspace_api_task_def_arn     = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-api:1"
+# dspace_jobs_task_def_arn    = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-jobs:1"

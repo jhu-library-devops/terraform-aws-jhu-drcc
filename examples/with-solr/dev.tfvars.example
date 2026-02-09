@@ -1,0 +1,6 @@
+environment          = "dev"
+solr_node_count      = 1
+deploy_zookeeper     = false
+zookeeper_task_count = 0
+solr_cpu             = "1024"
+solr_memory          = "2048"

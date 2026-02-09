@@ -1,0 +1,34 @@
+# Production Configuration
+organization  = "jhu"
+project_name  = "dspace"
+environment   = "prod"
+aws_region    = "us-east-1"
+public_domain = "dspace.library.jhu.edu"
+
+# VPC Configuration - Production network layout
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+
+# Database Configuration - Production sizing
+db_instance_class    = "db.r5.xlarge"
+db_allocated_storage = 500
+db_name              = "dspace"
+db_username          = "dspaceuser"
+db_multi_az          = true
+
+# Solr Configuration - High availability cluster
+solr_node_count      = 5
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+solr_cpu             = "4096"
+solr_memory          = "8192"
+
+# DSpace Application Configuration - Production capacity
+dspace_angular_task_count = 4
+dspace_api_task_count     = 4
+
+# Optional: Use external task definitions managed via CI/CD
+# dspace_angular_task_def_arn = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-angular:latest"
+# dspace_api_task_def_arn     = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-api:latest"
+# dspace_jobs_task_def_arn    = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-jobs:latest"
