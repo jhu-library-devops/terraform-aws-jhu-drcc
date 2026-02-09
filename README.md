@@ -78,13 +78,13 @@ The modular design allows for deploying other DRCC applications using the founda
 - Other repository platforms
 
 ## Module Catalog
+## Module Catalog
 
 | Module | Purpose | Dependencies |
 |--------|---------|--------------|
-| [drcc-foundation](./modules/drcc-foundation/) | Shared infrastructure (VPC, ALB, RDS, ECS cluster) | None |
-| [solr-search-cluster](./modules/solr-search-cluster/) | Solr search with Zookeeper | drcc-foundation |
-| [dspace-app-services](./modules/dspace-app-services/) | DSpace application services | drcc-foundation |
-
+| [drcc-foundation](./modules/drcc-foundation/) |  | None |
+| [dspace-app-services](./modules/dspace-app-services/) |  | drcc-foundation |
+| [solr-search-cluster](./modules/solr-search-cluster/) |  | drcc-foundation |
 ## Getting Started
 
 ### Prerequisites
