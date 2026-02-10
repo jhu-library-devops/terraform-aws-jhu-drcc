@@ -124,3 +124,16 @@ variable "dspace_api_task_count" {
   type        = number
   default     = 1
 }
+
+# Initialization Configuration
+variable "enable_init_tasks" {
+  description = "Enable Lambda function for running initialization tasks"
+  type        = bool
+  default     = false
+}
+
+variable "dspace_api_image" {
+  description = "Docker image for DSpace API (used for initialization)"
+  type        = string
+  default     = null
+}

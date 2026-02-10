@@ -85,8 +85,16 @@ module "dspace_app" {
   ecs_cluster_id           = module.foundation.ecs_cluster_id
   ecs_cluster_arn          = module.foundation.ecs_cluster_arn
   ecs_security_group_id    = module.foundation.ecs_security_group_id
+  ecs_task_execution_role_arn = module.foundation.ecs_task_execution_role_arn
+  ecs_task_role_arn           = module.foundation.ecs_task_role_arn
   alb_https_listener_arn   = module.foundation.alb_https_listener_arn
   private_alb_listener_arn = module.foundation.private_alb_listener_arn
+
+  # Initialization configuration
+  enable_init_tasks = var.enable_init_tasks
+  db_secret_arn     = module.foundation.db_credentials_secret_arn
+  solr_url          = "http://${module.foundation.private_alb_dns_name}:8983/solr"
+  dspace_api_image  = var.dspace_api_image
 
   # Task definitions (if using external definitions)
   dspace_angular_task_def_arn = var.dspace_angular_task_def_arn

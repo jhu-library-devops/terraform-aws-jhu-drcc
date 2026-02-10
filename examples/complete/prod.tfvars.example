@@ -28,6 +28,11 @@ solr_memory          = "8192"
 dspace_angular_task_count = 4
 dspace_api_task_count     = 4
 
+# Initialization Configuration
+# Set to true on first deployment to run database migration and Solr setup
+enable_init_tasks = false
+dspace_api_image  = "dspace/dspace:7.6"
+
 # Optional: Use external task definitions managed via CI/CD
 # dspace_angular_task_def_arn = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-angular:latest"
 # dspace_api_task_def_arn     = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-api:latest"

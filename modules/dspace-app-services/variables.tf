@@ -50,6 +50,16 @@ variable "ecs_security_group_id" {
   type        = string
 }
 
+variable "ecs_task_execution_role_arn" {
+  description = "The ARN of the ECS task execution role."
+  type        = string
+}
+
+variable "ecs_task_role_arn" {
+  description = "The ARN of the ECS task role."
+  type        = string
+}
+
 variable "alb_https_listener_arn" {
   description = "The ARN of the public ALB HTTPS listener."
   type        = string
@@ -168,4 +178,29 @@ variable "deploy_admin_service" {
   description = "Whether to deploy the admin service"
   type        = bool
   default     = false
+}
+
+# Initialization Configuration
+variable "enable_init_tasks" {
+  description = "Enable Lambda function for running initialization tasks (database migration and Solr setup)"
+  type        = bool
+  default     = false
+}
+
+variable "db_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing database credentials"
+  type        = string
+  default     = null
+}
+
+variable "solr_url" {
+  description = "URL of the Solr server for initialization"
+  type        = string
+  default     = null
+}
+
+variable "dspace_api_image" {
+  description = "Docker image for DSpace API (used for initialization tasks)"
+  type        = string
+  default     = null
 }

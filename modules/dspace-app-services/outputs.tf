@@ -21,6 +21,24 @@ output "private_api_target_group_arn" {
 }
 
 # -----------------------------------------------------------------------------
+# Initialization Outputs
+# -----------------------------------------------------------------------------
+output "init_lambda_function_name" {
+  description = "Name of the Lambda function for running initialization tasks"
+  value       = var.enable_init_tasks ? aws_lambda_function.run_init_tasks[0].function_name : null
+}
+
+output "db_init_task_definition_arn" {
+  description = "ARN of the database initialization task definition"
+  value       = aws_ecs_task_definition.db_init.arn
+}
+
+output "solr_init_task_definition_arn" {
+  description = "ARN of the Solr initialization task definition"
+  value       = aws_ecs_task_definition.solr_init.arn
+}
+
+# -----------------------------------------------------------------------------
 # DSpace Services
 # -----------------------------------------------------------------------------
 output "dspace_angular_service_arn" {
