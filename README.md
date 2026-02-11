@@ -301,3 +301,31 @@ Use [AWS Pricing Calculator](https://calculator.aws) for detailed estimates base
 ## Acknowledgments
 
 Developed and maintained by the JHU Libraries DevOps team for the Digital Research and Curation Center.
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+No inputs.
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->
