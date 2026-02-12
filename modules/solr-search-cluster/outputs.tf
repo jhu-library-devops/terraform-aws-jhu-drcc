@@ -95,7 +95,7 @@ output "cloudwatch_dashboard_name" {
 
 output "cloudwatch_dashboard_url" {
   description = "The URL of the CloudWatch dashboard"
-  value       = var.enable_enhanced_monitoring ? "https://${data.aws_region.current.name}.console.aws.amazon.com/cloudwatch/home?region=${data.aws_region.current.name}#dashboards:name=${aws_cloudwatch_dashboard.solr[0].dashboard_name}" : null
+  value       = var.enable_enhanced_monitoring ? "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards:name=${aws_cloudwatch_dashboard.solr[0].dashboard_name}" : null
 }
 
 # EFS Outputs

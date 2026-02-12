@@ -384,7 +384,7 @@ resource "aws_ecs_service" "solr_fargate_service" {
     registry_arn = aws_service_discovery_service.solr_individual[count.index].arn
   }
 
-  depends_on = [aws_lb_target_group.solr.arn]
+  depends_on = [aws_lb_target_group.solr]
   tags       = local.tags
 
   lifecycle {

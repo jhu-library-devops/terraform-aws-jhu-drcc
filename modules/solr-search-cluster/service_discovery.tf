@@ -14,6 +14,11 @@ data "aws_network_interfaces" "private_alb" {
   }
 }
 
+# Get details of the first network interface
+data "aws_network_interface" "private_alb_first" {
+  id = element(data.aws_network_interfaces.private_alb.ids, 0)
+}
+
 # Individual service discovery services for each Solr node
 resource "aws_service_discovery_service" "solr_individual" {
   count = var.solr_node_count
@@ -26,10 +31,6 @@ resource "aws_service_discovery_service" "solr_individual" {
       ttl  = 60
       type = "A"
     }
-  }
-
-  health_check_custom_config {
-    failure_threshold = 1
   }
 
   tags = local.tags
@@ -88,10 +89,6 @@ resource "aws_service_discovery_service" "solr_alb" {
     routing_policy = "MULTIVALUE"
   }
 
-  health_check_custom_config {
-    failure_threshold = 1
-  }
-
   tags = local.tags
 }
 
@@ -101,6 +98,6 @@ resource "aws_service_discovery_instance" "solr_alb" {
   service_id  = aws_service_discovery_service.solr_alb.id
 
   attributes = {
-    AWS_INSTANCE_IPV4 = element(data.aws_network_interfaces.private_alb.private_ips, 0)
+    AWS_INSTANCE_IPV4 = data.aws_network_interface.private_alb_first.private_ip
   }
 }

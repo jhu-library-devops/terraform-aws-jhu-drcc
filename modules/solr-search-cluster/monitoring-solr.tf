@@ -159,7 +159,7 @@ resource "aws_cloudwatch_dashboard" "solr" {
           ]
           view    = "timeSeries"
           stacked = false
-          region  = data.aws_region.current.name
+          region  = var.aws_region
           title   = "Solr Service CPU/Memory Utilization"
           period  = 300
           stat    = "Average"
@@ -181,7 +181,7 @@ resource "aws_cloudwatch_dashboard" "solr" {
           ]
           view    = "timeSeries"
           stacked = false
-          region  = data.aws_region.current.name
+          region  = var.aws_region
           title   = "Solr Service Running Tasks"
           period  = 300
           stat    = "Average"

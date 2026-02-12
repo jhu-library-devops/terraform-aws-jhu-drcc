@@ -169,6 +169,24 @@ variable "zookeeper_image" {
   default     = "zookeeper:3.8"
 }
 
+variable "upstream_solr_image" {
+  description = "Upstream Solr image from Docker Hub"
+  type        = string
+  default     = "solr"
+}
+
+variable "upstream_zookeeper_image" {
+  description = "Upstream Zookeeper image from Docker Hub"
+  type        = string
+  default     = "zookeeper"
+}
+
+variable "populate_ecr_on_apply" {
+  description = "Whether to automatically populate ECR repositories during Terraform apply"
+  type        = bool
+  default     = true
+}
+
 variable "zookeeper_cpu" {
   description = "The CPU units for the Zookeeper task."
   type        = number
@@ -228,12 +246,6 @@ variable "tags" {
 }
 
 # Resource Naming Variables
-variable "ecs_cluster_name" {
-  description = "The name of the ECS cluster."
-  type        = string
-  default     = null
-}
-
 variable "cloudwatch_dashboard_name" {
   description = "The name of the CloudWatch dashboard."
   type        = string
@@ -293,14 +305,4 @@ variable "solr_collection_templates" {
       maxShardsPerNode  = 2
     }
   }
-}
-
-variable "private_alb_security_group_id" {
-  description = "Security group ID of the private ALB"
-  type        = string
-}
-
-variable "private_alb_name" {
-  description = "Name of the private ALB for Solr service discovery"
-  type        = string
 }
