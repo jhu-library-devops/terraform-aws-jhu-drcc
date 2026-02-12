@@ -1,0 +1,108 @@
+name: Update Module Catalog
+
+on:
+  pull_request:
+    paths:
+      - 'modules/**/main.tf'
+      - 'modules/**/README.md'
+      - '.github/workflows/update-module-catalog.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/**/main.tf'
+      - 'modules/**/README.md'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate module catalog
+        run: |
+          cat > /tmp/catalog.md << 'EOF'
+          | Module | Purpose | Dependencies |
+          |--------|---------|--------------|
+          EOF
+
+          # Process each module directory
+          for module_dir in modules/*/; do
+            module_name=$(basename "$module_dir")
+            
+            # Extract description from README.md first line after title
+            if [ -f "${module_dir}README.md" ]; then
+              description=$(grep -A 1 "^# " "${module_dir}README.md" | tail -1 | sed 's/^This module //' | sed 's/\.$//')
+            else
+              description="No description available"
+            fi
+            
+            # Determine dependencies based on module name
+            case "$module_name" in
+              "drcc-foundation")
+                dependencies="None"
+                ;;
+              "solr-search-cluster"|"dspace-app-services")
+                dependencies="drcc-foundation"
+                ;;
+              *)
+                dependencies="drcc-foundation"
+                ;;
+            esac
+            
+            echo "| [$module_name](./modules/$module_name/) | $description | $dependencies |" >> /tmp/catalog.md
+          done
+
+          # Update README.md - replace everything between the header and next section
+          awk '
+            BEGIN { in_catalog=0; }
+            /^## Module Catalog/ { 
+              print;
+              print "";
+              while (getline < "/tmp/catalog.md") print;
+              in_catalog=1;
+              next;
+            }
+            /^## Getting Started/ { in_catalog=0; }
+            !in_catalog { print; }
+          ' README.md > README.md.tmp
+          
+          mv README.md.tmp README.md
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet README.md; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git commit -m "docs: update module catalog"
+          git push
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.check_changes.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📚 Module catalog has been automatically updated in README.md'
+            })
