@@ -1,0 +1,136 @@
+name: Build and Push Container Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image to build'
+        required: true
+        type: choice
+        options:
+          - dspace
+          - dspace-angular
+          - solr
+          - zookeeper
+      image_tag:
+        description: 'Tag for the built image (e.g., 8.0, latest)'
+        required: true
+        type: string
+      upstream_version:
+        description: 'Upstream version to build from (e.g., DSpace release tag, Solr version)'
+        required: false
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          ECR_REGISTRY="${{ steps.ecr-login.outputs.registry }}"
+          ORG="${{ secrets.ECR_ORGANIZATION }}"
+          IMAGE="${{ inputs.image }}"
+          TAG="${{ inputs.image_tag }}"
+
+          # Map image name to ECR repository name
+          case "$IMAGE" in
+            dspace|dspace-angular)
+              REPO_NAME="${ORG}/dspace"
+              ;;
+            solr)
+              REPO_NAME="${ORG}/solr"
+              ;;
+            zookeeper)
+              REPO_NAME="${ORG}/zookeeper"
+              ;;
+          esac
+
+          echo "registry=${ECR_REGISTRY}" >> "$GITHUB_OUTPUT"
+          echo "repository=${REPO_NAME}" >> "$GITHUB_OUTPUT"
+          echo "full_image=${ECR_REGISTRY}/${REPO_NAME}:${TAG}" >> "$GITHUB_OUTPUT"
+
+      # --- DSpace API build ---
+      - name: Build and push DSpace API image
+        if: inputs.image == 'dspace'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/dspace/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.full_image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- DSpace Angular build ---
+      - name: Build and push DSpace Angular image
+        if: inputs.image == 'dspace-angular'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/dspace-angular/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.full_image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- Solr build (from upstream) ---
+      - name: Build and push Solr image
+        if: inputs.image == 'solr'
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/solr
+          file: docker/solr/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.full_image }}
+          build-args: |
+            SOLR_VERSION=${{ inputs.upstream_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # --- Zookeeper build (from upstream) ---
+      - name: Build and push Zookeeper image
+        if: inputs.image == 'zookeeper'
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/zookeeper
+          file: docker/zookeeper/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.full_image }}
+          build-args: |
+            ZK_VERSION=${{ inputs.upstream_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Output image URI
+        run: |
+          echo "### Image Published" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | \`${{ inputs.image }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tag | \`${{ inputs.image_tag }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| URI | \`${{ steps.meta.outputs.full_image }}\` |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,242 @@
+name: ECS Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - stage
+          - prod
+      service:
+        description: 'Service to deploy'
+        required: true
+        type: choice
+        options:
+          - dspace-api
+          - dspace-angular
+          - dspace-jobs
+          - solr
+          - zookeeper
+      image_uri:
+        description: 'Full ECR image URI (e.g., 123456789.dkr.ecr.us-east-1.amazonaws.com/org/dspace:latest)'
+        required: true
+        type: string
+      task_definition_file:
+        description: 'Path to task definition JSON file (optional, overrides default naming)'
+        required: false
+        type: string
+
+env:
+  AWS_REGION: us-east-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: "Deploy ${{ inputs.service }} to ${{ inputs.environment }}"
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve service and task definition names
+        id: resolve
+        run: |
+          ENV="${{ inputs.environment }}"
+          SERVICE="${{ inputs.service }}"
+          ORG="${{ secrets.ECR_ORGANIZATION }}"
+          CLUSTER="${{ vars.ECS_CLUSTER_NAME }}"
+
+          # Default cluster name if not set
+          if [ -z "$CLUSTER" ]; then
+            CLUSTER="dspace-${ENV}-cluster"
+          fi
+
+          # Map service input to ECS service name and task definition family
+          case "$SERVICE" in
+            dspace-api)
+              ECS_SERVICE="${ORG}-${ENV}-dspace-service"
+              TD_FAMILY="${ORG}-${ENV}-dspace-api"
+              CONTAINER_NAME="${ORG}-${ENV}-dspace-api"
+              ;;
+            dspace-angular)
+              ECS_SERVICE="${ORG}-${ENV}-dspace-angular-service"
+              TD_FAMILY="${ORG}-${ENV}-dspace-angular"
+              CONTAINER_NAME="${ORG}-${ENV}-dspace-angular"
+              ;;
+            dspace-jobs)
+              ECS_SERVICE="${ORG}-${ENV}-dspace-jobs-service"
+              TD_FAMILY="${ORG}-${ENV}-dspace-jobs"
+              CONTAINER_NAME="${ORG}-${ENV}-dspace-jobs"
+              ;;
+            solr)
+              ECS_SERVICE="${SERVICE}-${ENV}-solr-1-service"
+              TD_FAMILY="${SERVICE}-${ENV}-solr-1"
+              CONTAINER_NAME="solr-container"
+              ;;
+            zookeeper)
+              ECS_SERVICE="${SERVICE}-${ENV}-zookeeper-1-service"
+              TD_FAMILY="${SERVICE}-${ENV}-zookeeper-1"
+              CONTAINER_NAME="zookeeper-container"
+              ;;
+          esac
+
+          echo "cluster=${CLUSTER}" >> "$GITHUB_OUTPUT"
+          echo "ecs_service=${ECS_SERVICE}" >> "$GITHUB_OUTPUT"
+          echo "td_family=${TD_FAMILY}" >> "$GITHUB_OUTPUT"
+          echo "container_name=${CONTAINER_NAME}" >> "$GITHUB_OUTPUT"
+          echo "service_type=${SERVICE}" >> "$GITHUB_OUTPUT"
+
+      - name: Get current task definition
+        id: current-td
+        run: |
+          TD_FILE="${{ inputs.task_definition_file }}"
+
+          if [ -n "$TD_FILE" ] && [ -f "$TD_FILE" ]; then
+            # Use provided task definition file
+            echo "Using task definition from file: $TD_FILE"
+            TASK_DEF=$(cat "$TD_FILE")
+          else
+            # Fetch current task definition from ECS
+            echo "Fetching current task definition for ${{ steps.resolve.outputs.td_family }}"
+            TASK_DEF=$(aws ecs describe-task-definition \
+              --task-definition "${{ steps.resolve.outputs.td_family }}" \
+              --query 'taskDefinition' \
+              --output json)
+          fi
+
+          # Write to file for processing
+          echo "$TASK_DEF" > /tmp/current-td.json
+          echo "task_def_file=/tmp/current-td.json" >> "$GITHUB_OUTPUT"
+
+      - name: Register updated task definition
+        id: register-td
+        run: |
+          IMAGE_URI="${{ inputs.image_uri }}"
+          CONTAINER="${{ steps.resolve.outputs.container_name }}"
+
+          # Update the image in the container definition
+          UPDATED_TD=$(cat /tmp/current-td.json | \
+            jq --arg image "$IMAGE_URI" --arg container "$CONTAINER" \
+            '.containerDefinitions |= map(if .name == $container then .image = $image else . end)')
+
+          # Strip fields that cannot be included in register-task-definition
+          REGISTER_INPUT=$(echo "$UPDATED_TD" | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          # Register the new task definition
+          NEW_TD=$(aws ecs register-task-definition \
+            --cli-input-json "$REGISTER_INPUT")
+
+          NEW_TD_ARN=$(echo "$NEW_TD" | jq -r '.taskDefinition.taskDefinitionArn')
+          NEW_REVISION=$(echo "$NEW_TD" | jq -r '.taskDefinition.revision')
+
+          echo "new_td_arn=${NEW_TD_ARN}" >> "$GITHUB_OUTPUT"
+          echo "new_revision=${NEW_REVISION}" >> "$GITHUB_OUTPUT"
+          echo "Registered task definition: ${NEW_TD_ARN}"
+
+      - name: Update ECS service
+        id: update-service
+        run: |
+          SERVICE_TYPE="${{ steps.resolve.outputs.service_type }}"
+          CLUSTER="${{ steps.resolve.outputs.cluster }}"
+          NEW_TD_ARN="${{ steps.register-td.outputs.new_td_arn }}"
+          ENV="${{ inputs.environment }}"
+
+          # For solr and zookeeper, update all node services
+          if [ "$SERVICE_TYPE" = "solr" ]; then
+            for i in 1 2 3; do
+              SVC="${SERVICE_TYPE}-${ENV}-solr-${i}-service"
+              TD_FAMILY="${SERVICE_TYPE}-${ENV}-solr-${i}"
+              echo "Updating service ${SVC}..."
+
+              # For nodes 2 and 3, register their own task definitions with the same image
+              if [ "$i" -gt 1 ]; then
+                CURRENT=$(aws ecs describe-task-definition --task-definition "$TD_FAMILY" --query 'taskDefinition' --output json)
+                UPDATED=$(echo "$CURRENT" | jq --arg image "${{ inputs.image_uri }}" --arg container "solr-container" \
+                  '.containerDefinitions |= map(if .name == $container then .image = $image else . end)')
+                REGISTER_INPUT=$(echo "$UPDATED" | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+                NODE_TD=$(aws ecs register-task-definition --cli-input-json "$REGISTER_INPUT")
+                NODE_TD_ARN=$(echo "$NODE_TD" | jq -r '.taskDefinition.taskDefinitionArn')
+              else
+                NODE_TD_ARN="$NEW_TD_ARN"
+              fi
+
+              aws ecs update-service \
+                --cluster "$CLUSTER" \
+                --service "$SVC" \
+                --task-definition "$NODE_TD_ARN" \
+                --no-cli-pager
+            done
+          elif [ "$SERVICE_TYPE" = "zookeeper" ]; then
+            for i in 1 2 3; do
+              SVC="${SERVICE_TYPE}-${ENV}-zookeeper-${i}-service"
+              TD_FAMILY="${SERVICE_TYPE}-${ENV}-zookeeper-${i}"
+              echo "Updating service ${SVC}..."
+
+              if [ "$i" -gt 1 ]; then
+                CURRENT=$(aws ecs describe-task-definition --task-definition "$TD_FAMILY" --query 'taskDefinition' --output json)
+                UPDATED=$(echo "$CURRENT" | jq --arg image "${{ inputs.image_uri }}" --arg container "zookeeper-container" \
+                  '.containerDefinitions |= map(if .name == $container then .image = $image else . end)')
+                REGISTER_INPUT=$(echo "$UPDATED" | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+                NODE_TD=$(aws ecs register-task-definition --cli-input-json "$REGISTER_INPUT")
+                NODE_TD_ARN=$(echo "$NODE_TD" | jq -r '.taskDefinition.taskDefinitionArn')
+              else
+                NODE_TD_ARN="$NEW_TD_ARN"
+              fi
+
+              aws ecs update-service \
+                --cluster "$CLUSTER" \
+                --service "$SVC" \
+                --task-definition "$NODE_TD_ARN" \
+                --no-cli-pager
+            done
+          else
+            # Single service update for DSpace services
+            aws ecs update-service \
+              --cluster "$CLUSTER" \
+              --service "${{ steps.resolve.outputs.ecs_service }}" \
+              --task-definition "$NEW_TD_ARN" \
+              --no-cli-pager
+          fi
+
+      - name: Wait for deployment stability
+        run: |
+          SERVICE_TYPE="${{ steps.resolve.outputs.service_type }}"
+          CLUSTER="${{ steps.resolve.outputs.cluster }}"
+          ENV="${{ inputs.environment }}"
+
+          if [ "$SERVICE_TYPE" = "solr" ] || [ "$SERVICE_TYPE" = "zookeeper" ]; then
+            SVC="${SERVICE_TYPE}-${ENV}-${SERVICE_TYPE}-1-service"
+          else
+            SVC="${{ steps.resolve.outputs.ecs_service }}"
+          fi
+
+          echo "Waiting for service ${SVC} to stabilize..."
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER" \
+            --services "$SVC" || echo "Warning: Timed out waiting for stability. Check the ECS console."
+
+      - name: Output deployment summary
+        run: |
+          echo "### Deployment Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Environment | \`${{ inputs.environment }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Service | \`${{ inputs.service }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | \`${{ inputs.image_uri }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Task Definition | \`${{ steps.register-td.outputs.new_td_arn }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Revision | \`${{ steps.register-td.outputs.new_revision }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cluster | \`${{ steps.resolve.outputs.cluster }}\` |" >> "$GITHUB_STEP_SUMMARY"
