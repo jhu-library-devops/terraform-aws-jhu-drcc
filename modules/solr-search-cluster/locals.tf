@@ -7,6 +7,9 @@ locals {
     ManagedBy   = "OpenTofu" # Compatible with Terraform
   }
 
+  # Service discovery namespace
+  private_dns_namespace = var.service_discovery_namespace_name
+
   # Zookeeper configuration
   zk_service_name       = "zookeeper"
   zk_connection_string  = "${local.zk_service_name}-1.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-2.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-3.${var.service_discovery_namespace_name}:2181"
@@ -25,7 +28,7 @@ locals {
   solr_image_name = var.solr_image_name != null ? var.solr_image_name : "${var.organization}/solr"
 
   # Computed Zookeeper image using organization variable
-  zookeeper_image = var.zookeeper_image != null ? var.zookeeper_image : "390157243417.dkr.ecr.us-east-1.amazonaws.com/${var.organization}/zookeeper:latest"
+  zookeeper_image = var.zookeeper_image != null ? var.zookeeper_image : "${data.aws_caller_identity.current.account_id}.dkr.ecr.${data.aws_region.current.name}.amazonaws.com/${var.organization}/zookeeper:latest"
 }
 
 data "aws_caller_identity" "current" {}

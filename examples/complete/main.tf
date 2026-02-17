@@ -68,6 +68,10 @@ module "solr" {
   zookeeper_task_count = var.zookeeper_task_count
   solr_cpu             = var.solr_cpu
   solr_memory          = var.solr_memory
+
+  # Required attributes
+  db_endpoint   = module.foundation.db_instance_endpoint
+  public_domain = var.public_domain
 }
 
 # DSpace Application Services
@@ -104,4 +108,8 @@ module "dspace_app" {
   # Task counts
   dspace_angular_task_count = var.dspace_angular_task_count
   dspace_api_task_count     = var.dspace_api_task_count
+
+  # Required attributes
+  dspace_asset_store_bucket_name = var.dspace_asset_store_bucket_name
+  alarm_notification_email       = var.alarm_notification_email
 }

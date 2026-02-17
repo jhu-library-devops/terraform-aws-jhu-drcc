@@ -61,6 +61,8 @@ module "solr" {
   ecs_task_execution_role_arn      = module.foundation.ecs_task_execution_role_arn
   ecs_task_role_arn                = module.foundation.ecs_task_role_arn
   db_secret_arn                    = module.foundation.db_credentials_secret_arn
+  db_endpoint                      = module.foundation.db_instance_endpoint
+  public_domain                    = var.public_domain
 
   # Solr configuration
   solr_node_count      = var.solr_node_count

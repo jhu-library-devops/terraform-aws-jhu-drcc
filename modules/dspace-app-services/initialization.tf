@@ -19,7 +19,7 @@ resource "aws_ecs_task_definition" "db_init" {
       command = [
         "/bin/bash",
         "-c",
-        "dspace database migrate && dspace create-administrator -e admin@example.com -f Admin -l User -p admin -c en"
+        "dspace database migrate && dspace create-administrator -e ${var.dspace_admin_email} -f ${var.dspace_admin_first_name} -l ${var.dspace_admin_last_name} -p ${var.dspace_admin_password != null ? var.dspace_admin_password : "changeme"} -c en"
       ]
 
       logConfiguration = {

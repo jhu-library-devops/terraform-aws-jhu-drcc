@@ -108,7 +108,7 @@ resource "aws_lb_listener" "https" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-Res-2021-06"
-  certificate_arn   = var.ssl_certificate_arn
+  certificate_arn   = local.ssl_certificate_arn
 
   # Default action - return 404 (application modules will add rules)
   default_action {
@@ -175,6 +175,20 @@ resource "aws_route53_record" "private_dspace_zone_alb_alias" {
   alias {
     name                   = aws_lb.private.dns_name
     zone_id                = aws_lb.private.zone_id
+    evaluate_target_health = true
+  }
+}
+
+# Optional public DNS record pointing to the public ALB
+resource "aws_route53_record" "public_alb_alias" {
+  count   = var.public_hosted_zone_id != null && var.public_domain != null ? 1 : 0
+  zone_id = var.public_hosted_zone_id
+  name    = var.public_domain
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.main.dns_name
+    zone_id                = aws_lb.main.zone_id
     evaluate_target_health = true
   }
 }

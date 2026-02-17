@@ -152,11 +152,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "vpc_id" {
-  description = "The ID of the VPC."
-  type        = string
-}
-
 variable "dspace_asset_store_bucket_name" {
   description = "The name of the S3 bucket for DSpace asset store."
   type        = string
@@ -187,6 +182,32 @@ variable "enable_init_tasks" {
   default     = false
 }
 
+variable "dspace_admin_email" {
+  description = "Email address for the initial DSpace administrator account"
+  type        = string
+  default     = "admin@example.com"
+  sensitive   = true
+}
+
+variable "dspace_admin_first_name" {
+  description = "First name for the initial DSpace administrator account"
+  type        = string
+  default     = "Admin"
+}
+
+variable "dspace_admin_last_name" {
+  description = "Last name for the initial DSpace administrator account"
+  type        = string
+  default     = "User"
+}
+
+variable "dspace_admin_password" {
+  description = "Password for the initial DSpace administrator account. Must be changed after first login."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
 variable "db_secret_arn" {
   description = "ARN of the Secrets Manager secret containing database credentials"
   type        = string
@@ -203,4 +224,16 @@ variable "dspace_api_image" {
   description = "Docker image for DSpace API (used for initialization tasks)"
   type        = string
   default     = null
+}
+
+variable "github_repository" {
+  description = "The GitHub repository reference for OIDC federation (e.g., 'my-org/my-repo'). Used in GitHub Actions IAM role trust policies."
+  type        = string
+  default     = ""
+}
+
+variable "create_github_oidc_provider" {
+  description = "Whether to create the GitHub Actions OIDC identity provider. Set to false if the provider already exists in the AWS account."
+  type        = bool
+  default     = false
 }

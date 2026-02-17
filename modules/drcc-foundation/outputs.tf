@@ -190,3 +190,20 @@ output "service_discovery_namespace_arn" {
 }
 
 # EFS outputs moved to dspace-app-services module
+
+# ACM Certificate Outputs
+output "acm_certificate_arn" {
+  description = "The ARN of the ACM certificate (created or provided)"
+  value       = local.ssl_certificate_arn
+}
+
+output "acm_certificate_dns_validation_records" {
+  description = "DNS validation records for the ACM certificate. Create these records in your DNS provider to complete validation."
+  value = var.create_ssl_certificate ? [
+    for dvo in aws_acm_certificate.main[0].domain_validation_options : {
+      name  = dvo.resource_record_name
+      type  = dvo.resource_record_type
+      value = dvo.resource_record_value
+    }
+  ] : []
+}

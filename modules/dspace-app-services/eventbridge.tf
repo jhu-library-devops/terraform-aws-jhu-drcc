@@ -52,7 +52,7 @@ locals {
     stats-export = {
       description         = "DSpace statistics export job - runs monthly on the 1st at 2 AM UTC"
       schedule_expression = "cron(0 2 1 * ? *)"
-      command             = "/dspace/bin/dspace solr-export-statistics -i statistics -l m -d /tmp && echo 'Export complete, uploading to S3...' && MONTH=$(date -d 'last month' +%Y-%m) && aws s3 sync /tmp/ s3://jhu-dspace-statistics-exports/$MONTH/ && echo 'Upload complete to s3://jhu-dspace-statistics-exports/$MONTH/'"
+      command             = "/dspace/bin/dspace solr-export-statistics -i statistics -l m -d /tmp && echo 'Export complete, uploading to S3...' && MONTH=$(date -d 'last month' +%Y-%m) && aws s3 sync /tmp/ s3://${aws_s3_bucket.statistics_exports.bucket}/$MONTH/ && echo 'Upload complete to s3://${aws_s3_bucket.statistics_exports.bucket}/$MONTH/'"
     }
     statistics-import = {
       description = "DSpace statistics import job - manual trigger only"
@@ -60,19 +60,19 @@ locals {
         source      = ["dspace.statistics"]
         detail-type = ["Statistics Import"]
       })
-      command = "aws s3 sync s3://jhu-dspace-statistics-exports/full/ /tmp/stats/ && /dspace/bin/dspace solr-import-statistics -d /tmp/stats/"
+      command = "aws s3 sync s3://${aws_s3_bucket.statistics_exports.bucket}/full/ /tmp/stats/ && /dspace/bin/dspace solr-import-statistics -d /tmp/stats/"
     }
     stats-export-daily = {
       description         = "DSpace statistics export job - runs nightly at 2 AM UTC"
       schedule_expression = "cron(0 2 * * ? *)"
-      command             = "/dspace/bin/dspace solr-export-statistics -i statistics -l d -d /tmp && echo 'Export complete, uploading to S3...' && DATE=$(date +%Y-%m-%d) && aws s3 sync /tmp/ s3://jhu-dspace-statistics-exports/daily/$DATE/ && echo 'Upload complete to s3://jhu-dspace-statistics-exports/daily/$DATE/'"
+      command             = "/dspace/bin/dspace solr-export-statistics -i statistics -l d -d /tmp && echo 'Export complete, uploading to S3...' && DATE=$(date +%Y-%m-%d) && aws s3 sync /tmp/ s3://${aws_s3_bucket.statistics_exports.bucket}/daily/$DATE/ && echo 'Upload complete to s3://${aws_s3_bucket.statistics_exports.bucket}/daily/$DATE/'"
     }
     stats-full-export = {
       description = "DSpace full statistics export job - manual execution"
       event_pattern = jsonencode({
         source = ["manual"]
       })
-      command = "/dspace/bin/dspace solr-export-statistics -i statistics -l a -d /tmp && echo 'Export complete, uploading to S3...' && aws s3 sync /tmp/ s3://jhu-dspace-statistics-exports/full/ && echo 'Upload complete to s3://jhu-dspace-statistics-exports/full/'"
+      command = "/dspace/bin/dspace solr-export-statistics -i statistics -l a -d /tmp && echo 'Export complete, uploading to S3...' && aws s3 sync /tmp/ s3://${aws_s3_bucket.statistics_exports.bucket}/full/ && echo 'Upload complete to s3://${aws_s3_bucket.statistics_exports.bucket}/full/'"
     }
   }
 }
@@ -141,7 +141,7 @@ resource "aws_cloudwatch_event_target" "dspace_jobs" {
 
 # IAM role for EventBridge to execute ECS tasks
 resource "aws_iam_role" "eventbridge_ecs_role" {
-  name = "ecsEventsRole"
+  name = "${local.name}-ecs-events-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -158,7 +158,7 @@ resource "aws_iam_role" "eventbridge_ecs_role" {
   })
 
   tags = {
-    Name        = "ecsEventsRole"
+    Name        = "${local.name}-ecs-events-role"
     Environment = var.environment
     Project     = var.project_name
     ManagedBy   = "OpenTofu"

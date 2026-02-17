@@ -228,11 +228,6 @@ variable "tags" {
 }
 
 # Resource Naming Variables
-variable "ecs_cluster_name" {
-  description = "The name of the ECS cluster."
-  type        = string
-  default     = null
-}
 
 variable "cloudwatch_dashboard_name" {
   description = "The name of the CloudWatch dashboard."
@@ -293,14 +288,4 @@ variable "solr_collection_templates" {
       maxShardsPerNode  = 2
     }
   }
-}
-
-variable "private_alb_security_group_id" {
-  description = "Security group ID of the private ALB"
-  type        = string
-}
-
-variable "private_alb_name" {
-  description = "Name of the private ALB for Solr service discovery"
-  type        = string
 }

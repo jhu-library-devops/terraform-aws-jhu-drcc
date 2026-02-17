@@ -201,3 +201,7 @@ Consider using ECS auto-scaling for production workloads.
 - S3 buckets are created for asset storage and statistics exports
 - EventBridge rules can be configured for scheduled maintenance tasks
 - GitHub Actions OIDC allows secure deployments without long-lived credentials
+
+## Production Deployment
+
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).

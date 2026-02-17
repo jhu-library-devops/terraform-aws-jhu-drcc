@@ -236,3 +236,7 @@ solr_memory          = "8192"
 - Zookeeper nodes are also numbered starting from 1
 - EFS volumes are encrypted at rest and in transit
 - Health checks monitor both Solr and Zookeeper availability
+
+## Production Deployment
+
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).

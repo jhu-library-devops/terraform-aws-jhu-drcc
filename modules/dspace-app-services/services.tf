@@ -56,7 +56,7 @@ resource "aws_ecs_service" "dspace_angular_service" {
     container_port   = 4000
   }
 
-  depends_on = [var.alb_listener_arn]
+  depends_on = [var.alb_https_listener_arn]
   tags       = local.tags
 
   lifecycle {
@@ -95,7 +95,7 @@ resource "aws_ecs_service" "dspace_api_service" {
     container_port   = 8080
   }
 
-  depends_on = [var.alb_listener_arn]
+  depends_on = [var.alb_https_listener_arn]
   tags       = local.tags
 
   enable_execute_command = true

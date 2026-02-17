@@ -223,3 +223,7 @@ See the [examples](../../examples/) directory for complete usage examples:
 - Application modules should create their own target groups and listener rules
 - The service discovery namespace is shared across all applications
 - Database deployment is optional via the `deploy_database` variable
+
+## Production Deployment
+
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).
