@@ -1,6 +1,9 @@
 # Local .terraform directories
 **/.terraform/*
 
+# .terraform.lock.hcl files (generated, should not be committed)
+**/.terraform.lock.hcl
+
 # .tfstate files
 *.tfstate
 *.tfstate.*
@@ -33,5 +36,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Kiro MCP Manager - Sensitive configuration files
-.kiro/settings/
+# Kiro
+.kiro/
