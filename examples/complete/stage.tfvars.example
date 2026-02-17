@@ -1,34 +1,55 @@
-# Basic Configuration
-organization  = "jhu"
-project_name  = "dspace"
-environment   = "stage"
-aws_region    = "us-east-1"
-public_domain = "dspace-stage.example.edu"
+# =============================================================================
+# Staging Configuration - Complete DSpace Deployment
+# =============================================================================
+# Staging environment with reduced resources for testing and validation.
+# Copy to stage.tfvars and update values for your institution.
+#
+# Legend:
+#   [REQUIRED]  - You must set this value
+#   [OPTIONAL]  - Has a sensible default; override only if needed
+# =============================================================================
 
-# VPC Configuration
+# --- Identity (REQUIRED) ---
+organization  = "jhu"                        # [REQUIRED] Your institution's short name
+project_name  = "dspace"                     # [OPTIONAL] Project identifier
+environment   = "stage"                      # [REQUIRED] Environment name
+aws_region    = "us-east-1"                  # [OPTIONAL] AWS region
+public_domain = "dspace-stage.example.edu"   # [REQUIRED] Public domain for staging
+
+# --- VPC Configuration (REQUIRED) ---
+# Use a different CIDR range than production to allow VPC peering if needed.
 vpc_cidr             = "10.1.0.0/16"
 public_subnet_cidrs  = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
 private_subnet_cidrs = ["10.1.11.0/24", "10.1.12.0/24", "10.1.13.0/24"]
 
-# Database Configuration
-db_instance_class    = "db.t3.medium"
-db_allocated_storage = 100
-db_name              = "dspace"
-db_username          = "dspaceuser"
-db_multi_az          = false
+# --- Database Configuration (REQUIRED) ---
+# Smaller instance for staging; Multi-AZ disabled to reduce cost.
+db_instance_class    = "db.t3.medium"        # [REQUIRED] Smaller instance for staging
+db_allocated_storage = 100                   # [REQUIRED] Storage in GB
+db_name              = "dspace"              # [OPTIONAL] Database name
+db_username          = "dspaceuser"          # [OPTIONAL] Master username
+db_multi_az          = false                 # [OPTIONAL] Disable Multi-AZ to save cost
 
-# Solr Configuration
-solr_node_count      = 3
-deploy_zookeeper     = true
-zookeeper_task_count = 3
-solr_cpu             = "2048"
-solr_memory          = "4096"
+# --- Solr Configuration (REQUIRED) ---
+# 3-node cluster is sufficient for staging validation.
+solr_node_count      = 3                     # [REQUIRED] Fewer nodes than production
+deploy_zookeeper     = true                  # [REQUIRED] Deploy Zookeeper ensemble
+zookeeper_task_count = 3                     # [REQUIRED] Zookeeper nodes
+solr_cpu             = "2048"                # [REQUIRED] CPU units per Solr task
+solr_memory          = "4096"                # [REQUIRED] Memory in MiB per Solr task
 
-# DSpace Application Configuration
-dspace_angular_task_count = 2
-dspace_api_task_count     = 2
+# --- DSpace Application Configuration (REQUIRED) ---
+dspace_angular_task_count = 2                # [REQUIRED] Fewer tasks than production
+dspace_api_task_count     = 2                # [REQUIRED] Fewer tasks than production
 
-# Optional: Use external task definitions
+# --- DSpace Storage (REQUIRED) ---
+dspace_asset_store_bucket_name = "my-org-dspace-assets-stage"  # [REQUIRED] S3 bucket name
+
+# --- Monitoring (REQUIRED) ---
+alarm_notification_email = "ops@example.edu" # [REQUIRED] Email for alarm notifications
+
+# --- External Task Definitions (OPTIONAL) ---
+# Uncomment to use task definitions managed outside Terraform.
 # dspace_angular_task_def_arn = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-angular:1"
 # dspace_api_task_def_arn     = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-api:1"
 # dspace_jobs_task_def_arn    = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-jobs:1"
