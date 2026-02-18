@@ -115,6 +115,7 @@ No modules.
 | [archive_file.canary_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.solr_ops_layer_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_network_interface.private_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interface) | data source |
 | [aws_network_interfaces.private_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interfaces) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_secretsmanager_secret.existing_zk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
@@ -134,7 +135,7 @@ No modules.
 | <a name="input_ecr_repositories"></a> [ecr\_repositories](#input\_ecr\_repositories) | A list of ECR repository names to create. | `list(string)` | <pre>[<br>  "solr"<br>]</pre> | no |
 | <a name="input_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#input\_ecs\_cluster\_arn) | The ARN of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_cluster_id"></a> [ecs\_cluster\_id](#input\_ecs\_cluster\_id) | The ID of the ECS cluster (from foundation module). | `string` | n/a | yes |
-| <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | The name of the ECS cluster. | `string` | `null` | no |
+| <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | The name of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_security_group_id"></a> [ecs\_security\_group\_id](#input\_ecs\_security\_group\_id) | The ID of the ECS service security group. | `string` | n/a | yes |
 | <a name="input_ecs_task_execution_role_arn"></a> [ecs\_task\_execution\_role\_arn](#input\_ecs\_task\_execution\_role\_arn) | The ARN of the ECS task execution role. | `string` | n/a | yes |
 | <a name="input_ecs_task_role_arn"></a> [ecs\_task\_role\_arn](#input\_ecs\_task\_role\_arn) | The ARN of the ECS task role. | `string` | n/a | yes |
@@ -144,8 +145,8 @@ No modules.
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., dev, staging, prod). | `string` | n/a | yes |
 | <a name="input_max_task_count"></a> [max\_task\_count](#input\_max\_task\_count) | The maximum number of tasks for auto scaling. | `number` | `4` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name (e.g., jhu). | `string` | `"jhu"` | no |
-| <a name="input_private_alb_name"></a> [private\_alb\_name](#input\_private\_alb\_name) | Name of the private ALB for Solr service discovery | `string` | n/a | yes |
-| <a name="input_private_alb_security_group_id"></a> [private\_alb\_security\_group\_id](#input\_private\_alb\_security\_group\_id) | Security group ID of the private ALB | `string` | n/a | yes |
+| <a name="input_private_alb_name"></a> [private\_alb\_name](#input\_private\_alb\_name) | The name of the private ALB (for network interface discovery). | `string` | n/a | yes |
+| <a name="input_private_alb_security_group_id"></a> [private\_alb\_security\_group\_id](#input\_private\_alb\_security\_group\_id) | The ID of the private ALB security group. | `string` | n/a | yes |
 | <a name="input_private_solr_listener_arn"></a> [private\_solr\_listener\_arn](#input\_private\_solr\_listener\_arn) | The ARN of the private ALB Solr listener (port 8983). | `string` | n/a | yes |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs to use for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | A name for the project to be used in resource names and tags. | `string` | n/a | yes |

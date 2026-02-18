@@ -43,6 +43,7 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_acm_certificate.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
 | [aws_cloudwatch_dashboard.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_event_rule.alb_cloudmap_sync](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.alb_cloudmap_sync](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
@@ -75,6 +76,7 @@ No modules.
 | [aws_lb_listener.private_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
 | [aws_nat_gateway.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
 | [aws_route53_record.private_dspace_zone_alb_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.public_alb_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_zone.private_dspace_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [aws_route_table.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
@@ -109,6 +111,7 @@ No modules.
 | [aws_vpc_security_group_ingress_rule.solr_ecs_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_ecs_self_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_private_alb_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_wafv2_ip_set.trusted](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_web_acl.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
 | [aws_wafv2_web_acl_association.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association) | resource |
 | [random_password.db](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
@@ -131,6 +134,8 @@ No modules.
 | <a name="input_alb_name"></a> [alb\_name](#input\_alb\_name) | The name of the Application Load Balancer. | `string` | `null` | no |
 | <a name="input_app_email_domain"></a> [app\_email\_domain](#input\_app\_email\_domain) | The application email domain for SES configuration. | `string` | `"jscholarship.library.jhu.edu"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | n/a | yes |
+| <a name="input_create_ssl_certificate"></a> [create\_ssl\_certificate](#input\_create\_ssl\_certificate) | Whether to create an ACM certificate for the public domain. When true, `public_domain` must be set. The certificate will require DNS validation. | `bool` | `false` | no |
+| <a name="input_create_trusted_ip_set"></a> [create\_trusted\_ip\_set](#input\_create\_trusted\_ip\_set) | Whether to create a WAFv2 IP set for trusted IPs. When true, provide CIDRs via `trusted_ip_addresses`. When false, provide an existing IP set ARN via `trusted_ip_set_arn`. | `bool` | `false` | no |
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Controls if a new VPC and networking resources should be created. | `bool` | `true` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage in gigabytes for the RDS database. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The days to retain backups for. Must be > 0 to enable backups. Recommended: 7+ for production. | `number` | `7` | no |
@@ -157,12 +162,15 @@ No modules.
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | A list of existing private subnet IDs to use for ECS tasks. Required if create\_vpc is false. | `list(string)` | `null` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | A name for the project to be used in resource names and tags. | `string` | n/a | yes |
 | <a name="input_public_domain"></a> [public\_domain](#input\_public\_domain) | The public domain name of the dspace application. | `string` | `null` | no |
+| <a name="input_public_hosted_zone_id"></a> [public\_hosted\_zone\_id](#input\_public\_hosted\_zone\_id) | The ID of a public Route53 hosted zone. When set, an A record aliased to the public ALB is created for `public_domain`. | `string` | `null` | no |
 | <a name="input_public_subnet_cidrs"></a> [public\_subnet\_cidrs](#input\_public\_subnet\_cidrs) | List of CIDR blocks for public subnets. Used only when create\_vpc is true. | `list(string)` | `null` | no |
 | <a name="input_public_subnet_ids"></a> [public\_subnet\_ids](#input\_public\_subnet\_ids) | A list of existing public subnet IDs to use for the ALB. Required if create\_vpc is false. | `list(string)` | `null` | no |
 | <a name="input_sns_topic_name"></a> [sns\_topic\_name](#input\_sns\_topic\_name) | The name of the SNS topic for alerts. | `string` | `null` | no |
-| <a name="input_ssl_certificate_arn"></a> [ssl\_certificate\_arn](#input\_ssl\_certificate\_arn) | The ARN of the SSL certificate to use for HTTPS listeners. | `string` | `null` | no |
+| <a name="input_solr_cloudmap_service_id"></a> [solr\_cloudmap\_service\_id](#input\_solr\_cloudmap\_service\_id) | The ID of the Cloud Map service for Solr ALB sync. Provided by the solr-search-cluster module. | `string` | `""` | no |
+| <a name="input_ssl_certificate_arn"></a> [ssl\_certificate\_arn](#input\_ssl\_certificate\_arn) | The ARN of an existing SSL certificate to use for HTTPS listeners. Ignored when `create_ssl_certificate` is true. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
-| <a name="input_trusted_ip_set_arn"></a> [trusted\_ip\_set\_arn](#input\_trusted\_ip\_set\_arn) | The ARN of the WAF Trusted IP Set. | `string` | `null` | no |
+| <a name="input_trusted_ip_addresses"></a> [trusted\_ip\_addresses](#input\_trusted\_ip\_addresses) | List of CIDR blocks for the trusted IP set. Used only when `create_trusted_ip_set` is true. | `list(string)` | `[]` | no |
+| <a name="input_trusted_ip_set_arn"></a> [trusted\_ip\_set\_arn](#input\_trusted\_ip\_set\_arn) | The ARN of an existing WAF Trusted IP Set. Ignored when `create_trusted_ip_set` is true. | `string` | `null` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | The CIDR block for the VPC. Used only when create\_vpc is true. | `string` | `null` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of an existing VPC to use. Required if create\_vpc is false. | `string` | `null` | no |
 | <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | The name of the VPC. | `string` | `null` | no |
@@ -172,6 +180,8 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | The ARN of the ACM certificate (created or provided) |
+| <a name="output_acm_certificate_dns_validation_records"></a> [acm\_certificate\_dns\_validation\_records](#output\_acm\_certificate\_dns\_validation\_records) | DNS validation records for the ACM certificate. Create these records in your DNS provider to complete validation. |
 | <a name="output_alb_arn"></a> [alb\_arn](#output\_alb\_arn) | The ARN of the public Application Load Balancer |
 | <a name="output_alb_arn_suffix"></a> [alb\_arn\_suffix](#output\_alb\_arn\_suffix) | The ARN suffix of the public Application Load Balancer |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | The DNS name of the public Application Load Balancer |

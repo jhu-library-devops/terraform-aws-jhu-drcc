@@ -61,15 +61,16 @@ No modules.
 | [aws_ecs_service.dspace_api_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.db_init](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.solr_init](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_iam_openid_connect_provider.github_actions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_openid_connect_provider) | resource |
 | [aws_iam_role.eventbridge_ecs_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.github_actions_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.github_actions_test_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.init_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.eventbridge_ecs_ssm_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.github_actions_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy.github_actions_test_permissions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.init_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.eventbridge_ecs_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.github_actions_test_admin_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.init_lambda_basic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lambda_function.run_init_tasks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lb_listener_rule.private_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
@@ -102,8 +103,13 @@ No modules.
 | <a name="input_alarm_notification_email"></a> [alarm\_notification\_email](#input\_alarm\_notification\_email) | Email address for CloudWatch alarm notifications. | `string` | n/a | yes |
 | <a name="input_alb_https_listener_arn"></a> [alb\_https\_listener\_arn](#input\_alb\_https\_listener\_arn) | The ARN of the public ALB HTTPS listener. | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"us-east-1"` | no |
+| <a name="input_create_github_oidc_provider"></a> [create\_github\_oidc\_provider](#input\_create\_github\_oidc\_provider) | Whether to create the GitHub Actions OIDC identity provider. Set to false if the provider already exists in the AWS account. | `bool` | `false` | no |
 | <a name="input_db_secret_arn"></a> [db\_secret\_arn](#input\_db\_secret\_arn) | ARN of the Secrets Manager secret containing database credentials | `string` | `null` | no |
 | <a name="input_deploy_admin_service"></a> [deploy\_admin\_service](#input\_deploy\_admin\_service) | Whether to deploy the admin service | `bool` | `false` | no |
+| <a name="input_dspace_admin_email"></a> [dspace\_admin\_email](#input\_dspace\_admin\_email) | Email address for the initial DSpace administrator account | `string` | `"admin@example.com"` | no |
+| <a name="input_dspace_admin_first_name"></a> [dspace\_admin\_first\_name](#input\_dspace\_admin\_first\_name) | First name for the initial DSpace administrator account | `string` | `"Admin"` | no |
+| <a name="input_dspace_admin_last_name"></a> [dspace\_admin\_last\_name](#input\_dspace\_admin\_last\_name) | Last name for the initial DSpace administrator account | `string` | `"User"` | no |
+| <a name="input_dspace_admin_password"></a> [dspace\_admin\_password](#input\_dspace\_admin\_password) | Password for the initial DSpace administrator account. Must be changed after first login. | `string` | `null` | no |
 | <a name="input_dspace_angular_cpu"></a> [dspace\_angular\_cpu](#input\_dspace\_angular\_cpu) | The CPU units for the DSpace Angular task. | `number` | `512` | no |
 | <a name="input_dspace_angular_memory"></a> [dspace\_angular\_memory](#input\_dspace\_angular\_memory) | The memory (in MiB) for the DSpace Angular task. | `number` | `1024` | no |
 | <a name="input_dspace_angular_task_count"></a> [dspace\_angular\_task\_count](#input\_dspace\_angular\_task\_count) | The number of DSpace Angular tasks to run. | `number` | `1` | no |
@@ -124,6 +130,7 @@ No modules.
 | <a name="input_ecs_task_role_arn"></a> [ecs\_task\_role\_arn](#input\_ecs\_task\_role\_arn) | The ARN of the ECS task role. | `string` | n/a | yes |
 | <a name="input_enable_init_tasks"></a> [enable\_init\_tasks](#input\_enable\_init\_tasks) | Enable Lambda function for running initialization tasks (database migration and Solr setup) | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., stage, prod). | `string` | n/a | yes |
+| <a name="input_github_repository"></a> [github\_repository](#input\_github\_repository) | The GitHub repository reference for OIDC federation (e.g., 'my-org/my-repo'). Used in GitHub Actions IAM role trust policies. | `string` | `""` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name (e.g., jhu). | `string` | `"jhu"` | no |
 | <a name="input_private_alb_listener_arn"></a> [private\_alb\_listener\_arn](#input\_private\_alb\_listener\_arn) | The ARN of the private ALB HTTP listener. | `string` | n/a | yes |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs for ECS services. | `list(string)` | n/a | yes |
