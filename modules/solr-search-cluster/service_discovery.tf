@@ -95,12 +95,17 @@ resource "aws_service_discovery_service" "solr_alb" {
   tags = local.tags
 }
 
+# Look up the private IP from the first ALB network interface
+data "aws_network_interface" "private_alb" {
+  id = element(data.aws_network_interfaces.private_alb.ids, 0)
+}
+
 # Register ALB IP to solr service discovery
 resource "aws_service_discovery_instance" "solr_alb" {
   instance_id = "solr-alb"
   service_id  = aws_service_discovery_service.solr_alb.id
 
   attributes = {
-    AWS_INSTANCE_IPV4 = element(data.aws_network_interfaces.private_alb.private_ips, 0)
+    AWS_INSTANCE_IPV4 = data.aws_network_interface.private_alb.private_ip
   }
 }

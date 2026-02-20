@@ -115,6 +115,7 @@ No modules.
 | [archive_file.canary_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.solr_ops_layer_zip](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_network_interface.private_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interface) | data source |
 | [aws_network_interfaces.private_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interfaces) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_secretsmanager_secret.existing_zk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
@@ -134,7 +135,7 @@ No modules.
 | <a name="input_ecr_repositories"></a> [ecr\_repositories](#input\_ecr\_repositories) | A list of ECR repository names to create. | `list(string)` | <pre>[<br>  "solr"<br>]</pre> | no |
 | <a name="input_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#input\_ecs\_cluster\_arn) | The ARN of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_cluster_id"></a> [ecs\_cluster\_id](#input\_ecs\_cluster\_id) | The ID of the ECS cluster (from foundation module). | `string` | n/a | yes |
-| <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | The name of the ECS cluster. | `string` | `null` | no |
+| <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | The name of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_security_group_id"></a> [ecs\_security\_group\_id](#input\_ecs\_security\_group\_id) | The ID of the ECS service security group. | `string` | n/a | yes |
 | <a name="input_ecs_task_execution_role_arn"></a> [ecs\_task\_execution\_role\_arn](#input\_ecs\_task\_execution\_role\_arn) | The ARN of the ECS task execution role. | `string` | n/a | yes |
 | <a name="input_ecs_task_role_arn"></a> [ecs\_task\_role\_arn](#input\_ecs\_task\_role\_arn) | The ARN of the ECS task role. | `string` | n/a | yes |
@@ -144,8 +145,8 @@ No modules.
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., dev, staging, prod). | `string` | n/a | yes |
 | <a name="input_max_task_count"></a> [max\_task\_count](#input\_max\_task\_count) | The maximum number of tasks for auto scaling. | `number` | `4` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name (e.g., jhu). | `string` | `"jhu"` | no |
-| <a name="input_private_alb_name"></a> [private\_alb\_name](#input\_private\_alb\_name) | Name of the private ALB for Solr service discovery | `string` | n/a | yes |
-| <a name="input_private_alb_security_group_id"></a> [private\_alb\_security\_group\_id](#input\_private\_alb\_security\_group\_id) | Security group ID of the private ALB | `string` | n/a | yes |
+| <a name="input_private_alb_name"></a> [private\_alb\_name](#input\_private\_alb\_name) | The name of the private ALB (for network interface discovery). | `string` | n/a | yes |
+| <a name="input_private_alb_security_group_id"></a> [private\_alb\_security\_group\_id](#input\_private\_alb\_security\_group\_id) | The ID of the private ALB security group. | `string` | n/a | yes |
 | <a name="input_private_solr_listener_arn"></a> [private\_solr\_listener\_arn](#input\_private\_solr\_listener\_arn) | The ARN of the private ALB Solr listener (port 8983). | `string` | n/a | yes |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs to use for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | A name for the project to be used in resource names and tags. | `string` | n/a | yes |
@@ -159,16 +160,17 @@ No modules.
 | <a name="input_solr_image_name"></a> [solr\_image\_name](#input\_solr\_image\_name) | The name of the Solr Docker image to use. | `string` | `"solr"` | no |
 | <a name="input_solr_image_override"></a> [solr\_image\_override](#input\_solr\_image\_override) | Override the default Solr image with a custom image URI. | `string` | `null` | no |
 | <a name="input_solr_image_tag"></a> [solr\_image\_tag](#input\_solr\_image\_tag) | The tag of the Solr Docker image to use. | `string` | `"latest"` | no |
-| <a name="input_solr_memory"></a> [solr\_memory](#input\_solr\_memory) | The memory (in MiB) for the Solr task. | `number` | `4096` | no |
+| <a name="input_solr_memory"></a> [solr\_memory](#input\_solr\_memory) | The memory (in MiB) for the Solr task. | `number` | `16384` | no |
 | <a name="input_solr_node_count"></a> [solr\_node\_count](#input\_solr\_node\_count) | The number of individual Solr nodes (services) to deploy with DNS-based identities. | `number` | `3` | no |
+| <a name="input_solr_task_def_arns"></a> [solr\_task\_def\_arns](#input\_solr\_task\_def\_arns) | List of external task definition ARNs for Solr nodes (required when use\_external\_task\_definitions = true). | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
 | <a name="input_use_external_task_definitions"></a> [use\_external\_task\_definitions](#input\_use\_external\_task\_definitions) | Whether to use externally managed task definitions instead of module-generated ones. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC to deploy resources in. | `string` | n/a | yes |
 | <a name="input_zk_host_secret_arn"></a> [zk\_host\_secret\_arn](#input\_zk\_host\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the Zookeeper host information. | `string` | `null` | no |
 | <a name="input_zookeeper_cpu"></a> [zookeeper\_cpu](#input\_zookeeper\_cpu) | The CPU units for the Zookeeper task. | `number` | `512` | no |
-| <a name="input_zookeeper_image"></a> [zookeeper\_image](#input\_zookeeper\_image) | The Zookeeper Docker image to use. | `string` | `"zookeeper:3.8"` | no |
 | <a name="input_zookeeper_memory"></a> [zookeeper\_memory](#input\_zookeeper\_memory) | The memory (in MiB) for the Zookeeper task. | `number` | `1024` | no |
 | <a name="input_zookeeper_task_count"></a> [zookeeper\_task\_count](#input\_zookeeper\_task\_count) | The number of Zookeeper tasks to run. Should be odd number (3 or 5) for proper quorum. | `number` | `3` | no |
+| <a name="input_zookeeper_task_def_arns"></a> [zookeeper\_task\_def\_arns](#input\_zookeeper\_task\_def\_arns) | List of external task definition ARNs for Zookeeper nodes (required when use\_external\_task\_definitions = true and deploy\_zookeeper = true). | `list(string)` | `[]` | no |
 
 ## Outputs
 
@@ -191,6 +193,8 @@ No modules.
 | <a name="output_solr_service_name"></a> [solr\_service\_name](#output\_solr\_service\_name) | The name of the first Solr ECS service |
 | <a name="output_solr_service_names"></a> [solr\_service\_names](#output\_solr\_service\_names) | The names of the Solr ECS services |
 | <a name="output_solr_target_group_arn"></a> [solr\_target\_group\_arn](#output\_solr\_target\_group\_arn) | The ARN of the Solr target group |
+| <a name="output_solr_task_definition_arns"></a> [solr\_task\_definition\_arns](#output\_solr\_task\_definition\_arns) | List of ARNs for Solr node task definitions (Terraform-managed or external) |
+| <a name="output_solr_task_definition_families"></a> [solr\_task\_definition\_families](#output\_solr\_task\_definition\_families) | List of family names for Solr node task definitions (empty when using external task definitions) |
 | <a name="output_zookeeper_1_service_arn"></a> [zookeeper\_1\_service\_arn](#output\_zookeeper\_1\_service\_arn) | The ARN of the first Zookeeper ECS service |
 | <a name="output_zookeeper_1_service_name"></a> [zookeeper\_1\_service\_name](#output\_zookeeper\_1\_service\_name) | The name of the first Zookeeper ECS service |
 | <a name="output_zookeeper_2_service_arn"></a> [zookeeper\_2\_service\_arn](#output\_zookeeper\_2\_service\_arn) | The ARN of the second Zookeeper ECS service |
@@ -202,6 +206,8 @@ No modules.
 | <a name="output_zookeeper_secret_arn"></a> [zookeeper\_secret\_arn](#output\_zookeeper\_secret\_arn) | The ARN of the Secrets Manager secret for the Zookeeper host |
 | <a name="output_zookeeper_service_arn"></a> [zookeeper\_service\_arn](#output\_zookeeper\_service\_arn) | The ARN of the Zookeeper ECS service |
 | <a name="output_zookeeper_service_name"></a> [zookeeper\_service\_name](#output\_zookeeper\_service\_name) | The name of the Zookeeper ECS service |
+| <a name="output_zookeeper_task_definition_arns"></a> [zookeeper\_task\_definition\_arns](#output\_zookeeper\_task\_definition\_arns) | List of ARNs for Zookeeper node task definitions (Terraform-managed or external) |
+| <a name="output_zookeeper_task_definition_families"></a> [zookeeper\_task\_definition\_families](#output\_zookeeper\_task\_definition\_families) | List of family names for Zookeeper node task definitions (empty when using external task definitions) |
 <!-- END_TF_DOCS -->
 
 ## Examples
@@ -210,23 +216,215 @@ See the [examples](../../examples/) directory for complete usage examples:
 - [With Solr](../../examples/with-solr/) - Foundation + Solr cluster
 - [Complete](../../examples/complete/) - Full DSpace deployment with Solr
 
+## Task Definition Management
+
+This module supports two modes for managing ECS task definitions, controlled by the `use_external_task_definitions` variable.
+
+### Mode 1: External Task Definitions
+
+Set `use_external_task_definitions = true` to manage task definitions outside Terraform (e.g., via CI/CD pipelines). This allows image updates without Terraform drift.
+
+**Required Variables:**
+- `solr_task_def_arns` - List of ARNs for Solr node task definitions (length must match `solr_node_count`)
+- `zookeeper_task_def_arns` - List of ARNs for Zookeeper node task definitions (required if `deploy_zookeeper = true`)
+
+**Example:**
+```hcl
+use_external_task_definitions = true
+solr_node_count               = 3
+solr_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-1:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-2:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-3:25"
+]
+
+deploy_zookeeper = true
+zookeeper_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-1:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-2:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-3:18"
+]
+```
+
+### Mode 2: Terraform-Managed Task Definitions (Default)
+
+Set `use_external_task_definitions = false` (default) to let Terraform create and manage task definitions. Useful for initial setup or environments without CI/CD pipelines.
+
+**Optional Variables:**
+- `solr_cpu` / `solr_memory` - Resource allocation (defaults: 2048 CPU, 16384 MB)
+- `solr_image_override` - Override the default ECR image URI for Solr
+- `solr_image_tag` - Docker image tag for Solr (default: "latest")
+- `zookeeper_cpu` / `zookeeper_memory` - Resource allocation (defaults: 512 CPU, 1024 MB)
+
+**Example:**
+```hcl
+use_external_task_definitions = false
+
+# Solr configuration
+solr_node_count  = 3
+solr_cpu         = 2048
+solr_memory      = 16384
+
+# Zookeeper configuration
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+zookeeper_cpu        = 512
+zookeeper_memory     = 1024
+```
+
+### Lifecycle Policies
+
+Task definitions include `lifecycle { ignore_changes = [container_definitions] }` to prevent Terraform from detecting drift when CI/CD pipelines update container images. Non-image configuration changes (CPU, memory, volumes) still trigger Terraform updates.
+
+## Migration Guide
+
+### Migrating from External to Terraform-Managed Task Definitions
+
+**Step 1: Prepare Configuration**
+
+Add required variables to your `.tfvars` file:
+
+```hcl
+use_external_task_definitions = false
+
+# Solr configuration
+solr_node_count  = 3
+solr_cpu         = 2048
+solr_memory      = 16384
+
+# Zookeeper configuration (if deployed)
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+zookeeper_cpu        = 512
+zookeeper_memory     = 1024
+```
+
+**Step 2: Plan and Apply**
+
+```bash
+terraform plan -var-file=prod.tfvars
+# Review: Should show task definition resources being created (3 Solr + 3 Zookeeper)
+# Services should show no changes (task_definition ignored by lifecycle)
+
+terraform apply -var-file=prod.tfvars
+```
+
+**Step 3: Update CI/CD Pipelines**
+
+Modify workflows to register new revisions using Terraform-managed family names:
+
+```bash
+# Example: Update Solr node 1 task definition
+aws ecs register-task-definition \
+  --family jhu-prod-solr-1 \
+  --cli-input-json file://solr-1-task-def.json
+
+# Update service
+aws ecs update-service \
+  --cluster dspace-prod-cluster \
+  --service dspace-prod-solr-1-service \
+  --task-definition jhu-prod-solr-1:26
+```
+
+### Migrating from Terraform-Managed to External Task Definitions
+
+**Step 1: Export Current Task Definitions**
+
+```bash
+# Export all Solr node task definitions
+for i in 1 2 3; do
+  aws ecs describe-task-definition \
+    --task-definition jhu-prod-solr-$i \
+    --query 'taskDefinition' > solr-$i-task-def.json
+done
+
+# Export Zookeeper task definitions (if deployed)
+for i in 1 2 3; do
+  aws ecs describe-task-definition \
+    --task-definition jhu-prod-zookeeper-$i \
+    --query 'taskDefinition' > zookeeper-$i-task-def.json
+done
+```
+
+**Step 2: Update Configuration**
+
+```hcl
+use_external_task_definitions = true
+
+# Provide current task definition ARNs
+solr_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-1:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-2:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-3:25"
+]
+
+zookeeper_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-1:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-2:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-3:18"
+]
+
+# Remove Terraform-managed variables (no longer needed)
+# solr_image = ...
+# zookeeper_image = ...
+# etc.
+```
+
+**Step 3: Plan and Apply**
+
+```bash
+terraform plan -var-file=prod.tfvars
+# Review: Should show task definition resources being destroyed
+# Services should show no changes
+
+terraform apply -var-file=prod.tfvars
+```
+
+**Step 4: Set Up External Task Definition Management**
+
+Store task definition JSON files in version control and configure CI/CD to manage them independently.
+
+### Rollback Instructions
+
+If issues occur after migration:
+
+**From Terraform-Managed Back to External:**
+1. Get current task definition ARNs from ECS console
+2. Update `.tfvars` with `use_external_task_definitions = true` and the ARN lists
+3. Run `terraform apply` - Terraform destroys its task definitions but services continue using the ARNs
+
+**From External Back to Terraform-Managed:**
+1. Update `.tfvars` with `use_external_task_definitions = false`
+2. Run `terraform apply` - Terraform creates new task definitions
+
+### CI/CD Compatibility
+
+Both modes support CI/CD workflows:
+
+- **External Mode:** CI/CD registers task definitions and updates services directly
+- **Terraform-Managed Mode:** CI/CD registers new revisions of Terraform-managed families, then updates services
+
+The `lifecycle { ignore_changes = [container_definitions] }` policy ensures Terraform doesn't interfere with CI/CD image updates in either mode.
+
 ## Configuration Recommendations
 
 ### Development
 ```hcl
-solr_node_count      = 1
-deploy_zookeeper     = false  # Use embedded Zookeeper
-solr_cpu             = "1024"
-solr_memory          = "2048"
+use_external_task_definitions = false
+solr_node_count               = 1
+deploy_zookeeper              = false  # Use embedded Zookeeper
+solr_cpu                      = 1024
+solr_memory                   = 2048
 ```
 
 ### Production
 ```hcl
-solr_node_count      = 5      # Odd number for quorum
-deploy_zookeeper     = true
-zookeeper_task_count = 3      # 3 or 5 recommended
-solr_cpu             = "4096"
-solr_memory          = "8192"
+use_external_task_definitions = false  # or true with CI/CD
+solr_node_count               = 5      # Odd number for quorum
+deploy_zookeeper              = true
+zookeeper_task_count          = 3      # 3 or 5 recommended
+solr_cpu                      = 4096
+solr_memory                   = 16384
 ```
 
 ## Notes
@@ -236,3 +434,7 @@ solr_memory          = "8192"
 - Zookeeper nodes are also numbered starting from 1
 - EFS volumes are encrypted at rest and in transit
 - Health checks monitor both Solr and Zookeeper availability
+
+## Production Deployment
+
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).

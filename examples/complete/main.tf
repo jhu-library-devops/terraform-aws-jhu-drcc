@@ -16,11 +16,11 @@ provider "aws" {
 module "foundation" {
   source = "../../modules/drcc-foundation"
 
-  organization   = var.organization
-  project_name   = var.project_name
-  environment    = var.environment
-  aws_region     = var.aws_region
-  public_domain  = var.public_domain
+  organization  = var.organization
+  project_name  = var.project_name
+  environment   = var.environment
+  aws_region    = var.aws_region
+  public_domain = var.public_domain
 
   # VPC Configuration
   create_vpc           = true
@@ -68,6 +68,10 @@ module "solr" {
   zookeeper_task_count = var.zookeeper_task_count
   solr_cpu             = var.solr_cpu
   solr_memory          = var.solr_memory
+
+  # Required attributes
+  db_endpoint   = module.foundation.db_instance_endpoint
+  public_domain = var.public_domain
 }
 
 # DSpace Application Services
@@ -80,15 +84,15 @@ module "dspace_app" {
   aws_region   = var.aws_region
 
   # Infrastructure dependencies from foundation
-  vpc_id                   = module.foundation.vpc_id
-  private_subnet_ids       = module.foundation.private_subnet_ids
-  ecs_cluster_id           = module.foundation.ecs_cluster_id
-  ecs_cluster_arn          = module.foundation.ecs_cluster_arn
-  ecs_security_group_id    = module.foundation.ecs_security_group_id
+  vpc_id                      = module.foundation.vpc_id
+  private_subnet_ids          = module.foundation.private_subnet_ids
+  ecs_cluster_id              = module.foundation.ecs_cluster_id
+  ecs_cluster_arn             = module.foundation.ecs_cluster_arn
+  ecs_security_group_id       = module.foundation.ecs_security_group_id
   ecs_task_execution_role_arn = module.foundation.ecs_task_execution_role_arn
   ecs_task_role_arn           = module.foundation.ecs_task_role_arn
-  alb_https_listener_arn   = module.foundation.alb_https_listener_arn
-  private_alb_listener_arn = module.foundation.private_alb_listener_arn
+  alb_https_listener_arn      = module.foundation.alb_https_listener_arn
+  private_alb_listener_arn    = module.foundation.private_alb_listener_arn
 
   # Initialization configuration
   enable_init_tasks = var.enable_init_tasks
@@ -104,4 +108,8 @@ module "dspace_app" {
   # Task counts
   dspace_angular_task_count = var.dspace_angular_task_count
   dspace_api_task_count     = var.dspace_api_task_count
+
+  # Required attributes
+  dspace_asset_store_bucket_name = var.dspace_asset_store_bucket_name
+  alarm_notification_email       = var.alarm_notification_email
 }

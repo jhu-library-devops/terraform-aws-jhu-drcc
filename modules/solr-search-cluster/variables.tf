@@ -154,19 +154,13 @@ variable "solr_cpu" {
 variable "solr_memory" {
   description = "The memory (in MiB) for the Solr task."
   type        = number
-  default     = 4096
+  default     = 16384
 }
 
 variable "deploy_zookeeper" {
   description = "Whether to deploy a Zookeeper service."
   type        = bool
   default     = false
-}
-
-variable "zookeeper_image" {
-  description = "The Zookeeper Docker image to use."
-  type        = string
-  default     = "zookeeper:3.8"
 }
 
 variable "zookeeper_cpu" {
@@ -228,11 +222,6 @@ variable "tags" {
 }
 
 # Resource Naming Variables
-variable "ecs_cluster_name" {
-  description = "The name of the ECS cluster."
-  type        = string
-  default     = null
-}
 
 variable "cloudwatch_dashboard_name" {
   description = "The name of the CloudWatch dashboard."
@@ -244,6 +233,28 @@ variable "use_external_task_definitions" {
   description = "Whether to use externally managed task definitions instead of module-generated ones."
   type        = bool
   default     = false
+}
+
+variable "solr_task_def_arns" {
+  description = "List of external task definition ARNs for Solr nodes (required when use_external_task_definitions = true)."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.use_external_task_definitions || length(var.solr_task_def_arns) == var.solr_node_count
+    error_message = "solr_task_def_arns must contain exactly solr_node_count ARNs when use_external_task_definitions = true."
+  }
+}
+
+variable "zookeeper_task_def_arns" {
+  description = "List of external task definition ARNs for Zookeeper nodes (required when use_external_task_definitions = true and deploy_zookeeper = true)."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !var.use_external_task_definitions || !var.deploy_zookeeper || length(var.zookeeper_task_def_arns) == var.zookeeper_task_count
+    error_message = "zookeeper_task_def_arns must contain exactly zookeeper_task_count ARNs when use_external_task_definitions = true and deploy_zookeeper = true."
+  }
 }
 
 # Solr Auto-scaling Configuration
@@ -293,14 +304,4 @@ variable "solr_collection_templates" {
       maxShardsPerNode  = 2
     }
   }
-}
-
-variable "private_alb_security_group_id" {
-  description = "Security group ID of the private ALB"
-  type        = string
-}
-
-variable "private_alb_name" {
-  description = "Name of the private ALB for Solr service discovery"
-  type        = string
 }

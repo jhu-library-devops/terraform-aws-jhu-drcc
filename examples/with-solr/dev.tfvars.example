@@ -1,6 +1,34 @@
-environment          = "dev"
-solr_node_count      = 1
-deploy_zookeeper     = false
-zookeeper_task_count = 0
-solr_cpu             = "1024"
-solr_memory          = "2048"
+# =============================================================================
+# Development Configuration - Foundation + Solr
+# =============================================================================
+# Minimal Solr cluster for development and testing.
+# Foundation defaults (VPC, database) are set in variables.tf.
+#
+# Legend:
+#   [REQUIRED]  - You must set this value
+#   [OPTIONAL]  - Has a sensible default; override only if needed
+# =============================================================================
+
+# --- Identity ---
+# organization = "jhu"                       # [OPTIONAL] Default: "jhu"
+# project_name = "dspace"                    # [OPTIONAL] Default: "dspace"
+environment    = "dev"                       # [REQUIRED] Environment name
+
+# --- Solr Configuration ---
+# Single-node Solr without Zookeeper is the cheapest option for development.
+solr_node_count      = 1                     # [OPTIONAL] 1 node for dev (default: 3)
+deploy_zookeeper     = false                 # [OPTIONAL] Skip Zookeeper for dev (default: true)
+zookeeper_task_count = 0                     # [OPTIONAL] No Zookeeper nodes
+solr_cpu             = "1024"                # [OPTIONAL] 1 vCPU (default: 2048)
+solr_memory          = "2048"                # [OPTIONAL] 2 GB RAM (default: 4096)
+
+# --- VPC (OPTIONAL) ---
+# Uncomment to override foundation defaults:
+# vpc_cidr             = "10.2.0.0/16"
+# public_subnet_cidrs  = ["10.2.1.0/24", "10.2.2.0/24"]
+# private_subnet_cidrs = ["10.2.11.0/24", "10.2.12.0/24"]
+
+# --- Database (OPTIONAL) ---
+# Uncomment to override foundation defaults:
+# db_instance_class    = "db.t3.small"
+# db_allocated_storage = 50

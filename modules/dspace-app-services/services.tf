@@ -38,7 +38,7 @@ resource "aws_cloudwatch_log_group" "admin" {
 resource "aws_ecs_service" "dspace_angular_service" {
   name                               = "${var.organization}-${var.environment}-${var.project_name}-angular-service"
   cluster                            = var.ecs_cluster_id
-  task_definition                    = var.use_external_task_definitions ? var.dspace_angular_task_def_arn : null
+  task_definition                    = var.use_external_task_definitions ? var.dspace_angular_task_def_arn : aws_ecs_task_definition.dspace_angular[0].arn
   desired_count                      = var.dspace_angular_task_count
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 0
@@ -56,7 +56,7 @@ resource "aws_ecs_service" "dspace_angular_service" {
     container_port   = 4000
   }
 
-  depends_on = [var.alb_listener_arn]
+  depends_on = [aws_lb_listener_rule.ui_default]
   tags       = local.tags
 
   lifecycle {
@@ -66,10 +66,9 @@ resource "aws_ecs_service" "dspace_angular_service" {
 
 # DSpace API Service
 resource "aws_ecs_service" "dspace_api_service" {
-  count                              = var.use_external_task_definitions && var.dspace_api_task_def_arn == null ? 0 : 1
   name                               = "${var.organization}-${var.environment}-${var.project_name}-service"
   cluster                            = var.ecs_cluster_id
-  task_definition                    = var.dspace_api_task_def_arn
+  task_definition                    = var.use_external_task_definitions ? var.dspace_api_task_def_arn : aws_ecs_task_definition.dspace_api[0].arn
   desired_count                      = var.dspace_api_task_count
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 0
@@ -95,7 +94,7 @@ resource "aws_ecs_service" "dspace_api_service" {
     container_port   = 8080
   }
 
-  depends_on = [var.alb_listener_arn]
+  depends_on = [aws_lb_listener_rule.public_api, aws_lb_listener_rule.private_api]
   tags       = local.tags
 
   enable_execute_command = true
@@ -110,6 +109,28 @@ resource "aws_ecs_service" "admin_service" {
   name            = "${var.organization}-${var.environment}-admin-service"
   cluster         = var.ecs_cluster_id
   task_definition = "${var.organization}-${var.environment}-admin:1"
+  desired_count   = 0
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_security_group_id]
+    assign_public_ip = false
+  }
+
+  enable_execute_command = true
+  tags                   = local.tags
+
+  lifecycle {
+    ignore_changes = [desired_count, task_definition, name]
+  }
+}
+
+# DSpace Jobs Service
+resource "aws_ecs_service" "dspace_jobs_service" {
+  name            = "${var.organization}-${var.environment}-${var.project_name}-jobs-service"
+  cluster         = var.ecs_cluster_id
+  task_definition = var.use_external_task_definitions ? var.dspace_jobs_task_def_arn : aws_ecs_task_definition.dspace_jobs[0].arn
   desired_count   = 0
   launch_type     = "FARGATE"
 

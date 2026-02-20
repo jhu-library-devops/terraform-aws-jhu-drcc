@@ -16,11 +16,11 @@ provider "aws" {
 module "foundation" {
   source = "../../modules/drcc-foundation"
 
-  organization   = var.organization
-  project_name   = var.project_name
-  environment    = var.environment
-  aws_region     = var.aws_region
-  public_domain  = var.public_domain
+  organization  = var.organization
+  project_name  = var.project_name
+  environment   = var.environment
+  aws_region    = var.aws_region
+  public_domain = var.public_domain
 
   # VPC Configuration
   create_vpc           = true
@@ -61,6 +61,8 @@ module "solr" {
   ecs_task_execution_role_arn      = module.foundation.ecs_task_execution_role_arn
   ecs_task_role_arn                = module.foundation.ecs_task_role_arn
   db_secret_arn                    = module.foundation.db_credentials_secret_arn
+  db_endpoint                      = module.foundation.db_instance_endpoint
+  public_domain                    = var.public_domain
 
   # Solr configuration
   solr_node_count      = var.solr_node_count

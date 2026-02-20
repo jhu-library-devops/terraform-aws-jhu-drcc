@@ -15,11 +15,11 @@ resource "aws_ecs_task_definition" "db_init" {
     {
       name  = "db-init"
       image = var.dspace_api_image != null ? var.dspace_api_image : "dspace/dspace:latest"
-      
+
       command = [
         "/bin/bash",
         "-c",
-        "dspace database migrate && dspace create-administrator -e admin@example.com -f Admin -l User -p admin -c en"
+        "dspace database migrate && dspace create-administrator -e ${var.dspace_admin_email} -f ${var.dspace_admin_first_name} -l ${var.dspace_admin_last_name} -p $DSPACE_ADMIN_PASSWORD -c en"
       ]
 
       logConfiguration = {
@@ -31,35 +31,51 @@ resource "aws_ecs_task_definition" "db_init" {
         }
       }
 
-      environment = [
-        {
-          name  = "DSPACE_INSTALL_DIR"
-          value = "/dspace"
-        }
-      ]
+      environment = concat(
+        [
+          {
+            name  = "DSPACE_INSTALL_DIR"
+            value = "/dspace"
+          }
+        ],
+        var.dspace_admin_password_secret_arn == null ? [
+          {
+            name  = "DSPACE_ADMIN_PASSWORD"
+            value = coalesce(var.dspace_admin_password, "changeme")
+          }
+        ] : []
+      )
 
-      secrets = var.db_secret_arn != null ? [
-        {
-          name      = "DB_HOST"
-          valueFrom = "${var.db_secret_arn}:host::"
-        },
-        {
-          name      = "DB_PORT"
-          valueFrom = "${var.db_secret_arn}:port::"
-        },
-        {
-          name      = "DB_NAME"
-          valueFrom = "${var.db_secret_arn}:dbname::"
-        },
-        {
-          name      = "DB_USER"
-          valueFrom = "${var.db_secret_arn}:username::"
-        },
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "${var.db_secret_arn}:password::"
-        }
-      ] : []
+      secrets = concat(
+        var.db_secret_arn != null ? [
+          {
+            name      = "DB_HOST"
+            valueFrom = "${var.db_secret_arn}:host::"
+          },
+          {
+            name      = "DB_PORT"
+            valueFrom = "${var.db_secret_arn}:port::"
+          },
+          {
+            name      = "DB_NAME"
+            valueFrom = "${var.db_secret_arn}:dbname::"
+          },
+          {
+            name      = "DB_USER"
+            valueFrom = "${var.db_secret_arn}:username::"
+          },
+          {
+            name      = "DB_PASSWORD"
+            valueFrom = "${var.db_secret_arn}:password::"
+          }
+        ] : [],
+        var.dspace_admin_password_secret_arn != null ? [
+          {
+            name      = "DSPACE_ADMIN_PASSWORD"
+            valueFrom = var.dspace_admin_password_secret_arn
+          }
+        ] : []
+      )
     }
   ])
 
@@ -80,7 +96,7 @@ resource "aws_ecs_task_definition" "solr_init" {
     {
       name  = "solr-init"
       image = var.dspace_api_image != null ? var.dspace_api_image : "dspace/dspace:latest"
-      
+
       command = [
         "/bin/bash",
         "-c",
@@ -157,12 +173,12 @@ resource "aws_lambda_function" "run_init_tasks" {
 
   environment {
     variables = {
-      CLUSTER_ARN           = var.ecs_cluster_arn
-      DB_INIT_TASK_DEF      = aws_ecs_task_definition.db_init.arn
-      SOLR_INIT_TASK_DEF    = aws_ecs_task_definition.solr_init.arn
-      SUBNET_IDS            = jsonencode(var.private_subnet_ids)
-      SECURITY_GROUP_ID     = var.ecs_security_group_id
-      ENABLE_PUBLIC_IP      = "false"
+      CLUSTER_ARN        = var.ecs_cluster_arn
+      DB_INIT_TASK_DEF   = aws_ecs_task_definition.db_init.arn
+      SOLR_INIT_TASK_DEF = aws_ecs_task_definition.solr_init.arn
+      SUBNET_IDS         = jsonencode(var.private_subnet_ids)
+      SECURITY_GROUP_ID  = var.ecs_security_group_id
+      ENABLE_PUBLIC_IP   = "false"
     }
   }
 

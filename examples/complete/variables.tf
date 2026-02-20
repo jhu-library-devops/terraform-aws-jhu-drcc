@@ -137,3 +137,13 @@ variable "dspace_api_image" {
   type        = string
   default     = null
 }
+
+variable "dspace_asset_store_bucket_name" {
+  description = "The name of the S3 bucket for DSpace asset store"
+  type        = string
+}
+
+variable "alarm_notification_email" {
+  description = "Email address for CloudWatch alarm notifications"
+  type        = string
+}

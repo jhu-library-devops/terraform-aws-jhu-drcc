@@ -11,8 +11,8 @@ resource "aws_sns_topic_subscription" "email_alerts" {
 
 # Extract target group ARN suffix for CloudWatch dimensions
 locals {
-  ui_target_group_arn_suffix  = split("/", var.ui_target_group_arn)[2]
-  api_target_group_arn_suffix = var.public_api_target_group_arn != null && var.public_api_target_group_arn != "" ? split("/", var.public_api_target_group_arn)[2] : ""
+  ui_target_group_arn_suffix  = split("/", aws_lb_target_group.ui.arn)[2]
+  api_target_group_arn_suffix = aws_lb_target_group.public_api.arn != null && aws_lb_target_group.public_api.arn != "" ? split("/", aws_lb_target_group.public_api.arn)[2] : ""
 }
 
 # CloudWatch Alarm for DSpace UI availability
@@ -42,7 +42,7 @@ resource "aws_cloudwatch_metric_alarm" "dspace_ui_unavailable" {
 
 # CloudWatch Alarm for DSpace API availability
 resource "aws_cloudwatch_metric_alarm" "dspace_api_unavailable" {
-  count = var.public_api_target_group_arn != "" && var.public_api_target_group_arn != null ? 1 : 0
+  count = local.api_target_group_arn_suffix != "" ? 1 : 0
 
   alarm_name          = "DSpace-${title(var.environment)}-API-Unavailable"
   comparison_operator = "LessThanThreshold"

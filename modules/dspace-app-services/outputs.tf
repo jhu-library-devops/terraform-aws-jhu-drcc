@@ -53,17 +53,42 @@ output "dspace_angular_service_name" {
 
 output "dspace_api_service_arn" {
   description = "The ARN of the DSpace API ECS service"
-  value       = length(aws_ecs_service.dspace_api_service) > 0 ? aws_ecs_service.dspace_api_service[0].id : null
+  value       = aws_ecs_service.dspace_api_service.id
 }
 
 output "dspace_api_service_name" {
   description = "The name of the DSpace API ECS service"
-  value       = length(aws_ecs_service.dspace_api_service) > 0 ? aws_ecs_service.dspace_api_service[0].name : null
+  value       = aws_ecs_service.dspace_api_service.name
+}
+
+output "dspace_api_task_definition_arn" {
+  description = "ARN of the DSpace API task definition (Terraform-managed or external)"
+  value       = var.use_external_task_definitions ? var.dspace_api_task_def_arn : aws_ecs_task_definition.dspace_api[0].arn
+}
+
+output "dspace_api_task_definition_family" {
+  description = "Family name of the DSpace API task definition (null when using external task definitions)"
+  value       = var.use_external_task_definitions ? null : aws_ecs_task_definition.dspace_api[0].family
+}
+
+output "dspace_angular_task_definition_arn" {
+  description = "ARN of the DSpace Angular task definition (Terraform-managed or external)"
+  value       = var.use_external_task_definitions ? var.dspace_angular_task_def_arn : aws_ecs_task_definition.dspace_angular[0].arn
+}
+
+output "dspace_angular_task_definition_family" {
+  description = "Family name of the DSpace Angular task definition (null when using external task definitions)"
+  value       = var.use_external_task_definitions ? null : aws_ecs_task_definition.dspace_angular[0].family
 }
 
 output "dspace_jobs_task_definition_arn" {
-  description = "The ARN of the DSpace jobs task definition"
-  value       = var.dspace_jobs_task_def_arn
+  description = "ARN of the DSpace Jobs task definition (Terraform-managed or external)"
+  value       = var.use_external_task_definitions ? var.dspace_jobs_task_def_arn : aws_ecs_task_definition.dspace_jobs[0].arn
+}
+
+output "dspace_jobs_task_definition_family" {
+  description = "Family name of the DSpace Jobs task definition (null when using external task definitions)"
+  value       = var.use_external_task_definitions ? null : aws_ecs_task_definition.dspace_jobs[0].family
 }
 
 output "dspace_scheduled_jobs" {
@@ -140,4 +165,27 @@ output "dashboard_name" {
 output "dashboard_url" {
   description = "The URL to access the CloudWatch dashboard"
   value       = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards:name=${aws_cloudwatch_dashboard.dspace_application.dashboard_name}"
+}
+
+# -----------------------------------------------------------------------------
+# Database Outputs
+# -----------------------------------------------------------------------------
+output "db_instance_id" {
+  description = "The ID of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].id : null
+}
+
+output "db_instance_identifier" {
+  description = "The identifier of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].identifier : null
+}
+
+output "db_instance_endpoint" {
+  description = "The endpoint of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].endpoint : null
+}
+
+output "db_credentials_secret_arn" {
+  description = "The ARN of the database credentials secret"
+  value       = local.db_secret_arn_final
 }

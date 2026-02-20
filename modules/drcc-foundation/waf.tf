@@ -1,3 +1,19 @@
+# Optional WAFv2 IP Set for trusted IPs
+# When create_trusted_ip_set is true, this module creates and manages the IP set.
+# When false, an existing IP set ARN must be provided via trusted_ip_set_arn.
+resource "aws_wafv2_ip_set" "trusted" {
+  count              = var.create_trusted_ip_set ? 1 : 0
+  name               = "${local.name}-trusted-ips"
+  scope              = "REGIONAL"
+  ip_address_version = "IPV4"
+  addresses          = var.trusted_ip_addresses
+  tags               = local.tags
+}
+
+locals {
+  trusted_ip_set_arn = var.create_trusted_ip_set ? aws_wafv2_ip_set.trusted[0].arn : var.trusted_ip_set_arn
+}
+
 # WAF Web ACL for Application Load Balancer protection
 resource "aws_wafv2_web_acl" "main" {
   name  = "${local.name}-waf"
@@ -19,7 +35,7 @@ resource "aws_wafv2_web_acl" "main" {
 
     statement {
       ip_set_reference_statement {
-        arn = var.trusted_ip_set_arn
+        arn = local.trusted_ip_set_arn
       }
     }
 

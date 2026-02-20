@@ -357,7 +357,7 @@ resource "aws_ecs_service" "solr_fargate_service" {
   count                  = var.solr_node_count
   name                   = "${var.project_name}-${var.environment}-solr-${count.index + 1}-service"
   cluster                = var.ecs_cluster_id
-  task_definition        = var.use_external_task_definitions ? null : aws_ecs_task_definition.solr_fargate_td[count.index].arn
+  task_definition        = var.use_external_task_definitions ? var.solr_task_def_arns[count.index] : aws_ecs_task_definition.solr_fargate_td[count.index].arn
   desired_count          = 1
   launch_type            = "FARGATE"
   enable_execute_command = true
@@ -384,7 +384,7 @@ resource "aws_ecs_service" "solr_fargate_service" {
     registry_arn = aws_service_discovery_service.solr_individual[count.index].arn
   }
 
-  depends_on = [aws_lb_target_group.solr.arn]
+  depends_on = [aws_lb_target_group.solr]
   tags       = local.tags
 
   lifecycle {
@@ -397,7 +397,7 @@ resource "aws_ecs_service" "zookeeper_fargate_service" {
   count                  = var.deploy_zookeeper ? var.zookeeper_task_count : 0
   name                   = "${var.project_name}-${var.environment}-zookeeper-${count.index + 1}-service"
   cluster                = var.ecs_cluster_id
-  task_definition        = var.use_external_task_definitions ? null : aws_ecs_task_definition.zookeeper_fargate_td[count.index].arn
+  task_definition        = var.use_external_task_definitions ? var.zookeeper_task_def_arns[count.index] : aws_ecs_task_definition.zookeeper_fargate_td[count.index].arn
   desired_count          = 1
   launch_type            = "FARGATE"
   enable_execute_command = true

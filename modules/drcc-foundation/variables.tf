@@ -157,14 +157,32 @@ variable "alb_ingress_cidr_blocks" {
   default     = ["0.0.0.0/0"]
 }
 
+variable "create_ssl_certificate" {
+  description = "Whether to create an ACM certificate for the public domain. When true, `public_domain` must be set. The certificate will require DNS validation."
+  type        = bool
+  default     = false
+}
+
 variable "ssl_certificate_arn" {
-  description = "The ARN of the SSL certificate to use for HTTPS listeners."
+  description = "The ARN of an existing SSL certificate to use for HTTPS listeners. Ignored when `create_ssl_certificate` is true."
   type        = string
   default     = null
 }
 
+variable "create_trusted_ip_set" {
+  description = "Whether to create a WAFv2 IP set for trusted IPs. When true, provide CIDRs via `trusted_ip_addresses`. When false, provide an existing IP set ARN via `trusted_ip_set_arn`."
+  type        = bool
+  default     = false
+}
+
+variable "trusted_ip_addresses" {
+  description = "List of CIDR blocks for the trusted IP set. Used only when `create_trusted_ip_set` is true."
+  type        = list(string)
+  default     = []
+}
+
 variable "trusted_ip_set_arn" {
-  description = "The ARN of the WAF Trusted IP Set."
+  description = "The ARN of an existing WAF Trusted IP Set. Ignored when `create_trusted_ip_set` is true."
   type        = string
   default     = null
 }
@@ -246,4 +264,16 @@ variable "db_secret_rotation_type" {
   description = "The type of database secret rotation (manual or automatic)."
   type        = string
   default     = "manual"
+}
+
+variable "solr_cloudmap_service_id" {
+  description = "The ID of the Cloud Map service for Solr ALB sync. Provided by the solr-search-cluster module."
+  type        = string
+  default     = ""
+}
+
+variable "public_hosted_zone_id" {
+  description = "The ID of a public Route53 hosted zone. When set, an A record aliased to the public ALB is created for `public_domain`."
+  type        = string
+  default     = null
 }
