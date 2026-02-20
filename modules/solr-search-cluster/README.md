@@ -62,7 +62,9 @@ No modules.
 | [aws_ecs_service.solr_fargate_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.zookeeper_fargate_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.solr_fargate_td](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_ecs_task_definition.solr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.zookeeper_fargate_td](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_ecs_task_definition.zookeeper_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_efs_access_point.solr_data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_access_point.solr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_access_point.zookeeper_data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
@@ -128,6 +130,7 @@ No modules.
 | <a name="input_alarms_sns_topic_arn"></a> [alarms\_sns\_topic\_arn](#input\_alarms\_sns\_topic\_arn) | SNS topic ARN for CloudWatch alarms | `string` | `""` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | n/a | yes |
 | <a name="input_cloudwatch_dashboard_name"></a> [cloudwatch\_dashboard\_name](#input\_cloudwatch\_dashboard\_name) | The name of the CloudWatch dashboard. | `string` | `null` | no |
+| <a name="input_db_credentials_ssm_arn"></a> [db\_credentials\_ssm\_arn](#input\_db\_credentials\_ssm\_arn) | ARN of SSM parameter containing database credentials (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
 | <a name="input_db_endpoint"></a> [db\_endpoint](#input\_db\_endpoint) | The database endpoint for the DSpace application. | `string` | n/a | yes |
 | <a name="input_db_secret_arn"></a> [db\_secret\_arn](#input\_db\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the database credentials. | `string` | n/a | yes |
 | <a name="input_deploy_zookeeper"></a> [deploy\_zookeeper](#input\_deploy\_zookeeper) | Whether to deploy a Zookeeper service. | `bool` | `false` | no |
@@ -157,19 +160,27 @@ No modules.
 | <a name="input_solr_cluster_policies"></a> [solr\_cluster\_policies](#input\_solr\_cluster\_policies) | Solr cluster auto-scaling policies | <pre>list(object({<br>    replica    = optional(string)<br>    shard      = optional(string)<br>    collection = optional(string)<br>    cores      = optional(string)<br>    node       = optional(string)<br>    strict     = optional(bool)<br>  }))</pre> | <pre>[<br>  {<br>    "collection": "#ANY",<br>    "replica": "1",<br>    "shard": "#EACH",<br>    "strict": false<br>  },<br>  {<br>    "cores": "<5",<br>    "node": "#ANY"<br>  }<br>]</pre> | no |
 | <a name="input_solr_collection_templates"></a> [solr\_collection\_templates](#input\_solr\_collection\_templates) | Solr collection templates with auto-recovery settings | <pre>map(object({<br>    numShards         = optional(number)<br>    replicationFactor = optional(number)<br>    autoAddReplicas   = optional(bool)<br>    maxShardsPerNode  = optional(number)<br>  }))</pre> | <pre>{<br>  "dspace_default": {<br>    "autoAddReplicas": true,<br>    "maxShardsPerNode": 2,<br>    "numShards": 1,<br>    "replicationFactor": 3<br>  }<br>}</pre> | no |
 | <a name="input_solr_cpu"></a> [solr\_cpu](#input\_solr\_cpu) | The CPU units for the Solr task. | `number` | `2048` | no |
+| <a name="input_solr_efs_file_system_id"></a> [solr\_efs\_file\_system\_id](#input\_solr\_efs\_file\_system\_id) | EFS file system ID for Solr data volumes (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
+| <a name="input_solr_image"></a> [solr\_image](#input\_solr\_image) | Docker image URI for Solr (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
 | <a name="input_solr_image_name"></a> [solr\_image\_name](#input\_solr\_image\_name) | The name of the Solr Docker image to use. | `string` | `"solr"` | no |
 | <a name="input_solr_image_override"></a> [solr\_image\_override](#input\_solr\_image\_override) | Override the default Solr image with a custom image URI. | `string` | `null` | no |
 | <a name="input_solr_image_tag"></a> [solr\_image\_tag](#input\_solr\_image\_tag) | The tag of the Solr Docker image to use. | `string` | `"latest"` | no |
-| <a name="input_solr_memory"></a> [solr\_memory](#input\_solr\_memory) | The memory (in MiB) for the Solr task. | `number` | `4096` | no |
+| <a name="input_solr_memory"></a> [solr\_memory](#input\_solr\_memory) | The memory (in MiB) for the Solr task. | `number` | `16384` | no |
 | <a name="input_solr_node_count"></a> [solr\_node\_count](#input\_solr\_node\_count) | The number of individual Solr nodes (services) to deploy with DNS-based identities. | `number` | `3` | no |
+| <a name="input_solr_opts"></a> [solr\_opts](#input\_solr\_opts) | JVM tuning parameters for Solr (e.g., heap size settings). | `string` | `"-Xms8g -Xmx8g"` | no |
+| <a name="input_solr_task_def_arns"></a> [solr\_task\_def\_arns](#input\_solr\_task\_def\_arns) | List of external task definition ARNs for Solr nodes (required when use\_external\_task\_definitions = true). | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
 | <a name="input_use_external_task_definitions"></a> [use\_external\_task\_definitions](#input\_use\_external\_task\_definitions) | Whether to use externally managed task definitions instead of module-generated ones. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC to deploy resources in. | `string` | n/a | yes |
 | <a name="input_zk_host_secret_arn"></a> [zk\_host\_secret\_arn](#input\_zk\_host\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the Zookeeper host information. | `string` | `null` | no |
 | <a name="input_zookeeper_cpu"></a> [zookeeper\_cpu](#input\_zookeeper\_cpu) | The CPU units for the Zookeeper task. | `number` | `512` | no |
-| <a name="input_zookeeper_image"></a> [zookeeper\_image](#input\_zookeeper\_image) | The Zookeeper Docker image to use. | `string` | `"zookeeper:3.8"` | no |
+| <a name="input_zookeeper_efs_file_system_id"></a> [zookeeper\_efs\_file\_system\_id](#input\_zookeeper\_efs\_file\_system\_id) | EFS file system ID for Zookeeper data volumes (required when use\_external\_task\_definitions = false and deploy\_zookeeper = true). | `string` | `null` | no |
+| <a name="input_zookeeper_host_ssm_arn"></a> [zookeeper\_host\_ssm\_arn](#input\_zookeeper\_host\_ssm\_arn) | ARN of SSM parameter containing Zookeeper host information (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
+| <a name="input_zookeeper_image"></a> [zookeeper\_image](#input\_zookeeper\_image) | Docker image URI for Zookeeper (required when use\_external\_task\_definitions = false and deploy\_zookeeper = true). | `string` | `null` | no |
+| <a name="input_zookeeper_jvmflags"></a> [zookeeper\_jvmflags](#input\_zookeeper\_jvmflags) | JVM tuning parameters for Zookeeper (e.g., heap size settings). | `string` | `""` | no |
 | <a name="input_zookeeper_memory"></a> [zookeeper\_memory](#input\_zookeeper\_memory) | The memory (in MiB) for the Zookeeper task. | `number` | `1024` | no |
 | <a name="input_zookeeper_task_count"></a> [zookeeper\_task\_count](#input\_zookeeper\_task\_count) | The number of Zookeeper tasks to run. Should be odd number (3 or 5) for proper quorum. | `number` | `3` | no |
+| <a name="input_zookeeper_task_def_arns"></a> [zookeeper\_task\_def\_arns](#input\_zookeeper\_task\_def\_arns) | List of external task definition ARNs for Zookeeper nodes (required when use\_external\_task\_definitions = true and deploy\_zookeeper = true). | `list(string)` | `[]` | no |
 
 ## Outputs
 
@@ -192,6 +203,8 @@ No modules.
 | <a name="output_solr_service_name"></a> [solr\_service\_name](#output\_solr\_service\_name) | The name of the first Solr ECS service |
 | <a name="output_solr_service_names"></a> [solr\_service\_names](#output\_solr\_service\_names) | The names of the Solr ECS services |
 | <a name="output_solr_target_group_arn"></a> [solr\_target\_group\_arn](#output\_solr\_target\_group\_arn) | The ARN of the Solr target group |
+| <a name="output_solr_task_definition_arns"></a> [solr\_task\_definition\_arns](#output\_solr\_task\_definition\_arns) | List of ARNs for Solr node task definitions (Terraform-managed or external) |
+| <a name="output_solr_task_definition_families"></a> [solr\_task\_definition\_families](#output\_solr\_task\_definition\_families) | List of family names for Solr node task definitions (empty when using external task definitions) |
 | <a name="output_zookeeper_1_service_arn"></a> [zookeeper\_1\_service\_arn](#output\_zookeeper\_1\_service\_arn) | The ARN of the first Zookeeper ECS service |
 | <a name="output_zookeeper_1_service_name"></a> [zookeeper\_1\_service\_name](#output\_zookeeper\_1\_service\_name) | The name of the first Zookeeper ECS service |
 | <a name="output_zookeeper_2_service_arn"></a> [zookeeper\_2\_service\_arn](#output\_zookeeper\_2\_service\_arn) | The ARN of the second Zookeeper ECS service |
@@ -203,6 +216,8 @@ No modules.
 | <a name="output_zookeeper_secret_arn"></a> [zookeeper\_secret\_arn](#output\_zookeeper\_secret\_arn) | The ARN of the Secrets Manager secret for the Zookeeper host |
 | <a name="output_zookeeper_service_arn"></a> [zookeeper\_service\_arn](#output\_zookeeper\_service\_arn) | The ARN of the Zookeeper ECS service |
 | <a name="output_zookeeper_service_name"></a> [zookeeper\_service\_name](#output\_zookeeper\_service\_name) | The name of the Zookeeper ECS service |
+| <a name="output_zookeeper_task_definition_arns"></a> [zookeeper\_task\_definition\_arns](#output\_zookeeper\_task\_definition\_arns) | List of ARNs for Zookeeper node task definitions (Terraform-managed or external) |
+| <a name="output_zookeeper_task_definition_families"></a> [zookeeper\_task\_definition\_families](#output\_zookeeper\_task\_definition\_families) | List of family names for Zookeeper node task definitions (empty when using external task definitions) |
 <!-- END_TF_DOCS -->
 
 ## Examples
