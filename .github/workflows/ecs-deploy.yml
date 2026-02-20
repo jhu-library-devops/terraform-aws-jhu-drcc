@@ -20,6 +20,11 @@ on:
           - dspace-jobs
           - solr
           - zookeeper
+      node_count:
+        description: 'Number of nodes to update (only used for solr and zookeeper services)'
+        required: false
+        type: number
+        default: 3
       image_uri:
         description: 'Full ECR image URI (e.g., 123456789.dkr.ecr.us-east-1.amazonaws.com/org/dspace:latest)'
         required: true
@@ -154,9 +159,11 @@ jobs:
           NEW_TD_ARN="${{ steps.register-td.outputs.new_td_arn }}"
           ENV="${{ inputs.environment }}"
 
+          NODE_COUNT="${{ inputs.node_count }}"
+
           # For solr and zookeeper, update all node services
           if [ "$SERVICE_TYPE" = "solr" ]; then
-            for i in 1 2 3; do
+            for i in $(seq 1 "$NODE_COUNT"); do
               SVC="${SERVICE_TYPE}-${ENV}-solr-${i}-service"
               TD_FAMILY="${SERVICE_TYPE}-${ENV}-solr-${i}"
               echo "Updating service ${SVC}..."
@@ -180,7 +187,7 @@ jobs:
                 --no-cli-pager
             done
           elif [ "$SERVICE_TYPE" = "zookeeper" ]; then
-            for i in 1 2 3; do
+            for i in $(seq 1 "$NODE_COUNT"); do
               SVC="${SERVICE_TYPE}-${ENV}-zookeeper-${i}-service"
               TD_FAMILY="${SERVICE_TYPE}-${ENV}-zookeeper-${i}"
               echo "Updating service ${SVC}..."
