@@ -56,15 +56,89 @@ dspace_asset_store_bucket_name = "my-org-dspace-assets"  # [REQUIRED] S3 bucket 
 # --- Monitoring (REQUIRED) ---
 alarm_notification_email = "ops@example.edu" # [REQUIRED] Email for CloudWatch alarm notifications
 
+# --- Task Definition Management (REQUIRED) ---
+# Set to false to have Terraform manage task definitions (recommended).
+# Set to true to use externally-managed task definitions (e.g., from CI/CD).
+use_external_task_definitions = false        # [REQUIRED] Use Terraform-managed task definitions
+
+# --- Container Images (REQUIRED when use_external_task_definitions = false) ---
+# Docker image URIs for DSpace containers. Update with your registry and tags.
+dspace_api_image     = "ghcr.io/dspace/dspace:dspace-7.6.1"      # [REQUIRED] DSpace REST API image
+dspace_angular_image = "ghcr.io/dspace/dspace-angular:dspace-7.6.1"  # [REQUIRED] DSpace Angular UI image
+dspace_jobs_image    = "ghcr.io/dspace/dspace:dspace-7.6.1"      # [REQUIRED] DSpace Jobs image
+
+# Solr and Zookeeper images
+solr_image      = "ghcr.io/jhu-sheridan-libraries/idc-isle-solr:latest"  # [REQUIRED] Solr image
+zookeeper_image = "zookeeper:3.9.3"                              # [REQUIRED] Zookeeper image
+
+# --- Container Resource Allocation (OPTIONAL) ---
+# CPU and memory settings for each service. Defaults shown are recommended for production.
+# CPU units: 1024 = 1 vCPU. Memory in MiB.
+dspace_api_cpu       = 2048                  # [OPTIONAL] DSpace API CPU (default: 2048)
+dspace_api_memory    = 4096                  # [OPTIONAL] DSpace API memory (default: 4096)
+dspace_angular_cpu   = 2048                  # [OPTIONAL] Angular UI CPU (default: 2048)
+dspace_angular_memory = 4096                 # [OPTIONAL] Angular UI memory (default: 4096)
+dspace_jobs_cpu      = 4096                  # [OPTIONAL] Jobs service CPU (default: 4096)
+dspace_jobs_memory   = 8192                  # [OPTIONAL] Jobs service memory (default: 8192)
+solr_cpu             = 2048                  # [OPTIONAL] Solr CPU per node (default: 2048)
+solr_memory          = 16384                 # [OPTIONAL] Solr memory per node (default: 16384)
+
+# --- Solr JVM Tuning (OPTIONAL) ---
+# JVM heap settings for Solr. Production uses 12GB heap (3/4 of 16GB memory allocation).
+solr_opts = "-Xms12g -Xmx12g"                # [OPTIONAL] Solr JVM options (default: "-Xms8g -Xmx8g")
+
+# --- SSM Parameter ARNs for Secrets (REQUIRED when use_external_task_definitions = false) ---
+# ARNs of AWS Systems Manager Parameter Store parameters containing sensitive configuration.
+# Replace ACCOUNT_ID with your AWS account ID.
+
+# DSpace API and Jobs secrets
+dspace_server_url_ssm_arn     = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/server/url"
+dspace_server_ssr_url_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/server/ssr-url"
+dspace_ui_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/ui/url"
+dspace_db_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/url"
+dspace_db_username_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/username"
+dspace_db_password_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/password"
+dspace_solr_url_ssm_arn       = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/solr/url"
+
+# Mail server configuration
+dspace_mail_server_ssm_arn   = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/mail/server"
+dspace_mail_port_ssm_arn     = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/mail/port"
+dspace_mail_username_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/mail/username"
+dspace_mail_password_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/mail/password"
+dspace_mail_disabled_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/mail/disabled"
+
+# JVM options for DSpace services
+dspace_api_java_opts_ssm_arn  = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/api/java-opts"
+dspace_jobs_java_opts_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/jobs/java-opts"
+
+# Google Analytics configuration (optional)
+dspace_google_analytics_key_ssm_arn        = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/analytics/key"
+dspace_google_analytics_cron_ssm_arn       = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/analytics/cron"
+dspace_google_analytics_api_secret_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/analytics/api-secret"
+
+# DSpace Angular secrets
+dspace_rest_host_ssm_arn       = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/angular/rest-host"
+dspace_rest_ssr_url_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/angular/rest-ssr-url"
+dspace_angular_node_opts_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/angular/node-opts"
+
+# Solr and Zookeeper secrets
+zookeeper_host_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/zookeeper/host"
+db_credentials_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/credentials"
+
+# --- CloudWatch Log Groups (OPTIONAL) ---
+# Log group names for container logs. If not specified, defaults will be used.
+dspace_api_log_group_name     = "/ecs/jhu-prod-dspace-api"
+dspace_angular_log_group_name = "/ecs/jhu-prod-dspace-angular"
+dspace_jobs_log_group_name    = "/ecs/jhu-prod-dspace-jobs"
+
 # --- Initialization (OPTIONAL) ---
 # Set enable_init_tasks to true on first deployment to run database migration and Solr setup.
 # After initialization completes, set back to false.
 enable_init_tasks = false                    # [OPTIONAL] Enable init Lambda (default: false)
-dspace_api_image  = "dspace/dspace:7.6"      # [OPTIONAL] DSpace API image for init tasks
 
 # --- External Task Definitions (OPTIONAL) ---
-# Uncomment to use task definitions managed outside Terraform (e.g., via CI/CD pipeline).
-# When set, the module uses these ARNs instead of creating its own task definitions.
+# Only needed when use_external_task_definitions = true.
+# Uncomment and set these if you manage task definitions outside Terraform (e.g., via CI/CD pipeline).
 # dspace_angular_task_def_arn = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-angular:latest"
 # dspace_api_task_def_arn     = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-api:latest"
 # dspace_jobs_task_def_arn    = "arn:aws:ecs:us-east-1:123456789012:task-definition/dspace-jobs:latest"
