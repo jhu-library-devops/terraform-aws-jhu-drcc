@@ -11,8 +11,8 @@ locals {
   private_dns_namespace = var.service_discovery_namespace_name
 
   # Zookeeper configuration
-  zk_service_name       = "zookeeper"
-  zk_connection_string  = "${local.zk_service_name}-1.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-2.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-3.${var.service_discovery_namespace_name}:2181"
+  zk_service_name      = "zookeeper"
+  zk_connection_string = "${local.zk_service_name}-1.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-2.${var.service_discovery_namespace_name}:2181,${local.zk_service_name}-3.${var.service_discovery_namespace_name}:2181"
 
   # Secret ARN resolution
   zk_secret_arn_final = var.deploy_zookeeper ? aws_secretsmanager_secret.zk[0].arn : (var.zk_host_secret_arn != null ? data.aws_secretsmanager_secret.existing_zk[0].arn : null)
