@@ -62,9 +62,7 @@ No modules.
 | [aws_ecs_service.solr_fargate_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_service.zookeeper_fargate_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.solr_fargate_td](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_ecs_task_definition.solr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_ecs_task_definition.zookeeper_fargate_td](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_ecs_task_definition.zookeeper_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_efs_access_point.solr_data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_access_point.solr_node](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
 | [aws_efs_access_point.zookeeper_data](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_access_point) | resource |
@@ -130,7 +128,6 @@ No modules.
 | <a name="input_alarms_sns_topic_arn"></a> [alarms\_sns\_topic\_arn](#input\_alarms\_sns\_topic\_arn) | SNS topic ARN for CloudWatch alarms | `string` | `""` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | n/a | yes |
 | <a name="input_cloudwatch_dashboard_name"></a> [cloudwatch\_dashboard\_name](#input\_cloudwatch\_dashboard\_name) | The name of the CloudWatch dashboard. | `string` | `null` | no |
-| <a name="input_db_credentials_ssm_arn"></a> [db\_credentials\_ssm\_arn](#input\_db\_credentials\_ssm\_arn) | ARN of SSM parameter containing database credentials (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
 | <a name="input_db_endpoint"></a> [db\_endpoint](#input\_db\_endpoint) | The database endpoint for the DSpace application. | `string` | n/a | yes |
 | <a name="input_db_secret_arn"></a> [db\_secret\_arn](#input\_db\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the database credentials. | `string` | n/a | yes |
 | <a name="input_deploy_zookeeper"></a> [deploy\_zookeeper](#input\_deploy\_zookeeper) | Whether to deploy a Zookeeper service. | `bool` | `false` | no |
@@ -160,24 +157,17 @@ No modules.
 | <a name="input_solr_cluster_policies"></a> [solr\_cluster\_policies](#input\_solr\_cluster\_policies) | Solr cluster auto-scaling policies | <pre>list(object({<br>    replica    = optional(string)<br>    shard      = optional(string)<br>    collection = optional(string)<br>    cores      = optional(string)<br>    node       = optional(string)<br>    strict     = optional(bool)<br>  }))</pre> | <pre>[<br>  {<br>    "collection": "#ANY",<br>    "replica": "1",<br>    "shard": "#EACH",<br>    "strict": false<br>  },<br>  {<br>    "cores": "<5",<br>    "node": "#ANY"<br>  }<br>]</pre> | no |
 | <a name="input_solr_collection_templates"></a> [solr\_collection\_templates](#input\_solr\_collection\_templates) | Solr collection templates with auto-recovery settings | <pre>map(object({<br>    numShards         = optional(number)<br>    replicationFactor = optional(number)<br>    autoAddReplicas   = optional(bool)<br>    maxShardsPerNode  = optional(number)<br>  }))</pre> | <pre>{<br>  "dspace_default": {<br>    "autoAddReplicas": true,<br>    "maxShardsPerNode": 2,<br>    "numShards": 1,<br>    "replicationFactor": 3<br>  }<br>}</pre> | no |
 | <a name="input_solr_cpu"></a> [solr\_cpu](#input\_solr\_cpu) | The CPU units for the Solr task. | `number` | `2048` | no |
-| <a name="input_solr_efs_file_system_id"></a> [solr\_efs\_file\_system\_id](#input\_solr\_efs\_file\_system\_id) | EFS file system ID for Solr data volumes (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
-| <a name="input_solr_image"></a> [solr\_image](#input\_solr\_image) | Docker image URI for Solr (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
 | <a name="input_solr_image_name"></a> [solr\_image\_name](#input\_solr\_image\_name) | The name of the Solr Docker image to use. | `string` | `"solr"` | no |
 | <a name="input_solr_image_override"></a> [solr\_image\_override](#input\_solr\_image\_override) | Override the default Solr image with a custom image URI. | `string` | `null` | no |
 | <a name="input_solr_image_tag"></a> [solr\_image\_tag](#input\_solr\_image\_tag) | The tag of the Solr Docker image to use. | `string` | `"latest"` | no |
 | <a name="input_solr_memory"></a> [solr\_memory](#input\_solr\_memory) | The memory (in MiB) for the Solr task. | `number` | `16384` | no |
 | <a name="input_solr_node_count"></a> [solr\_node\_count](#input\_solr\_node\_count) | The number of individual Solr nodes (services) to deploy with DNS-based identities. | `number` | `3` | no |
-| <a name="input_solr_opts"></a> [solr\_opts](#input\_solr\_opts) | JVM tuning parameters for Solr (e.g., heap size settings). | `string` | `"-Xms8g -Xmx8g"` | no |
 | <a name="input_solr_task_def_arns"></a> [solr\_task\_def\_arns](#input\_solr\_task\_def\_arns) | List of external task definition ARNs for Solr nodes (required when use\_external\_task\_definitions = true). | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to resources. | `map(string)` | `{}` | no |
 | <a name="input_use_external_task_definitions"></a> [use\_external\_task\_definitions](#input\_use\_external\_task\_definitions) | Whether to use externally managed task definitions instead of module-generated ones. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC to deploy resources in. | `string` | n/a | yes |
 | <a name="input_zk_host_secret_arn"></a> [zk\_host\_secret\_arn](#input\_zk\_host\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the Zookeeper host information. | `string` | `null` | no |
 | <a name="input_zookeeper_cpu"></a> [zookeeper\_cpu](#input\_zookeeper\_cpu) | The CPU units for the Zookeeper task. | `number` | `512` | no |
-| <a name="input_zookeeper_efs_file_system_id"></a> [zookeeper\_efs\_file\_system\_id](#input\_zookeeper\_efs\_file\_system\_id) | EFS file system ID for Zookeeper data volumes (required when use\_external\_task\_definitions = false and deploy\_zookeeper = true). | `string` | `null` | no |
-| <a name="input_zookeeper_host_ssm_arn"></a> [zookeeper\_host\_ssm\_arn](#input\_zookeeper\_host\_ssm\_arn) | ARN of SSM parameter containing Zookeeper host information (required when use\_external\_task\_definitions = false). | `string` | `null` | no |
-| <a name="input_zookeeper_image"></a> [zookeeper\_image](#input\_zookeeper\_image) | Docker image URI for Zookeeper (required when use\_external\_task\_definitions = false and deploy\_zookeeper = true). | `string` | `null` | no |
-| <a name="input_zookeeper_jvmflags"></a> [zookeeper\_jvmflags](#input\_zookeeper\_jvmflags) | JVM tuning parameters for Zookeeper (e.g., heap size settings). | `string` | `""` | no |
 | <a name="input_zookeeper_memory"></a> [zookeeper\_memory](#input\_zookeeper\_memory) | The memory (in MiB) for the Zookeeper task. | `number` | `1024` | no |
 | <a name="input_zookeeper_task_count"></a> [zookeeper\_task\_count](#input\_zookeeper\_task\_count) | The number of Zookeeper tasks to run. Should be odd number (3 or 5) for proper quorum. | `number` | `3` | no |
 | <a name="input_zookeeper_task_def_arns"></a> [zookeeper\_task\_def\_arns](#input\_zookeeper\_task\_def\_arns) | List of external task definition ARNs for Zookeeper nodes (required when use\_external\_task\_definitions = true and deploy\_zookeeper = true). | `list(string)` | `[]` | no |
@@ -260,58 +250,27 @@ zookeeper_task_def_arns = [
 
 Set `use_external_task_definitions = false` (default) to let Terraform create and manage task definitions. Useful for initial setup or environments without CI/CD pipelines.
 
-**Required Variables:**
-- `solr_image` - Docker image URI for Solr
-- `solr_efs_file_system_id` - EFS file system ID for Solr data volumes
-- `zookeeper_host_ssm_arn` - ARN of SSM parameter containing Zookeeper host information
-- `db_credentials_ssm_arn` - ARN of SSM parameter containing database credentials
-- `zookeeper_image` - Docker image URI for Zookeeper (if `deploy_zookeeper = true`)
-- `zookeeper_efs_file_system_id` - EFS file system ID for Zookeeper data (if `deploy_zookeeper = true`)
-
 **Optional Variables:**
 - `solr_cpu` / `solr_memory` - Resource allocation (defaults: 2048 CPU, 16384 MB)
-- `solr_opts` - JVM tuning parameters (default: "-Xms8g -Xmx8g")
+- `solr_image_override` - Override the default ECR image URI for Solr
+- `solr_image_tag` - Docker image tag for Solr (default: "latest")
 - `zookeeper_cpu` / `zookeeper_memory` - Resource allocation (defaults: 512 CPU, 1024 MB)
-- `zookeeper_jvmflags` - JVM tuning parameters for Zookeeper
 
 **Example:**
 ```hcl
 use_external_task_definitions = false
 
 # Solr configuration
-solr_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/solr:9.4.0"
-solr_node_count         = 3
-solr_cpu                = 2048
-solr_memory             = 16384
-solr_opts               = "-Xms12g -Xmx12g"  # Production tuning
-solr_efs_file_system_id = "fs-0123456789abcdef0"
+solr_node_count  = 3
+solr_cpu         = 2048
+solr_memory      = 16384
 
 # Zookeeper configuration
-deploy_zookeeper             = true
-zookeeper_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/zookeeper:3.9"
-zookeeper_task_count         = 3
-zookeeper_cpu                = 512
-zookeeper_memory             = 1024
-zookeeper_jvmflags           = "-Xms512m -Xmx512m"
-zookeeper_efs_file_system_id = "fs-0fedcba9876543210"
-
-# SSM parameter ARNs
-zookeeper_host_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/zk-host"
-db_credentials_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/db-credentials"
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+zookeeper_cpu        = 512
+zookeeper_memory     = 1024
 ```
-
-### JVM Tuning Recommendations
-
-**Solr (`solr_opts`):**
-- **Development/Stage:** `-Xms8g -Xmx8g` (8GB heap)
-- **Production:** `-Xms12g -Xmx12g` (12GB heap) or higher based on workload
-- Ensure heap size is ~50-75% of container memory allocation
-- Additional options: `-XX:+UseG1GC -XX:MaxGCPauseMillis=200`
-
-**Zookeeper (`zookeeper_jvmflags`):**
-- **Development/Stage:** `-Xms512m -Xmx512m` (512MB heap)
-- **Production:** `-Xms1g -Xmx1g` (1GB heap)
-- Zookeeper is less memory-intensive than Solr
 
 ### Lifecycle Policies
 
@@ -329,42 +288,18 @@ Add required variables to your `.tfvars` file:
 use_external_task_definitions = false
 
 # Solr configuration
-solr_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/solr:9.4.0"
-solr_node_count         = 3
-solr_cpu                = 2048
-solr_memory             = 16384
-solr_opts               = "-Xms12g -Xmx12g"
-solr_efs_file_system_id = "fs-0123456789abcdef0"
+solr_node_count  = 3
+solr_cpu         = 2048
+solr_memory      = 16384
 
 # Zookeeper configuration (if deployed)
-deploy_zookeeper             = true
-zookeeper_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/zookeeper:3.9"
-zookeeper_task_count         = 3
-zookeeper_cpu                = 512
-zookeeper_memory             = 1024
-zookeeper_jvmflags           = "-Xms512m -Xmx512m"
-zookeeper_efs_file_system_id = "fs-0fedcba9876543210"
-
-# SSM parameter ARNs
-zookeeper_host_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/zk-host"
-db_credentials_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/db-credentials"
+deploy_zookeeper     = true
+zookeeper_task_count = 3
+zookeeper_cpu        = 512
+zookeeper_memory     = 1024
 ```
 
-**Step 2: Create SSM Parameters**
-
-Ensure required SSM parameters exist:
-
-```bash
-aws ssm put-parameter --name /dspace/prod/zk-host \
-  --value "zookeeper-1.dspace-prod.local:2181,zookeeper-2.dspace-prod.local:2181,zookeeper-3.dspace-prod.local:2181" \
-  --type SecureString
-
-aws ssm put-parameter --name /dspace/prod/db-credentials \
-  --value "arn:aws:secretsmanager:us-east-1:123456789012:secret:dspace-db-credentials" \
-  --type SecureString
-```
-
-**Step 3: Plan and Apply**
+**Step 2: Plan and Apply**
 
 ```bash
 terraform plan -var-file=prod.tfvars
@@ -374,7 +309,7 @@ terraform plan -var-file=prod.tfvars
 terraform apply -var-file=prod.tfvars
 ```
 
-**Step 4: Update CI/CD Pipelines**
+**Step 3: Update CI/CD Pipelines**
 
 Modify workflows to register new revisions using Terraform-managed family names:
 
@@ -459,11 +394,8 @@ If issues occur after migration:
 3. Run `terraform apply` - Terraform destroys its task definitions but services continue using the ARNs
 
 **From External Back to Terraform-Managed:**
-1. Ensure all SSM parameters and EFS file systems exist
-2. Update `.tfvars` with `use_external_task_definitions = false` and required variables
-3. Run `terraform apply` - Terraform creates new task definitions
-4. Services continue using external ARNs until next deployment (lifecycle policy prevents automatic updates)
-5. Manually update services to use new Terraform-managed task definitions if needed
+1. Update `.tfvars` with `use_external_task_definitions = false`
+2. Run `terraform apply` - Terraform creates new task definitions
 
 ### CI/CD Compatibility
 
@@ -483,7 +415,6 @@ solr_node_count               = 1
 deploy_zookeeper              = false  # Use embedded Zookeeper
 solr_cpu                      = 1024
 solr_memory                   = 2048
-solr_opts                     = "-Xms1g -Xmx1g"
 ```
 
 ### Production
@@ -494,8 +425,6 @@ deploy_zookeeper              = true
 zookeeper_task_count          = 3      # 3 or 5 recommended
 solr_cpu                      = 4096
 solr_memory                   = 16384
-solr_opts                     = "-Xms12g -Xmx12g"
-zookeeper_jvmflags            = "-Xms1g -Xmx1g"
 ```
 
 ## Notes

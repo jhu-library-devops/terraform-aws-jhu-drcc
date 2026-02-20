@@ -155,20 +155,20 @@ output "zookeeper_data_efs_access_point_id" {
 
 output "solr_task_definition_arns" {
   description = "List of ARNs for Solr node task definitions (Terraform-managed or external)"
-  value       = var.use_external_task_definitions ? var.solr_task_def_arns : aws_ecs_task_definition.solr_node[*].arn
+  value       = var.use_external_task_definitions ? var.solr_task_def_arns : aws_ecs_task_definition.solr_fargate_td[*].arn
 }
 
 output "solr_task_definition_families" {
   description = "List of family names for Solr node task definitions (empty when using external task definitions)"
-  value       = var.use_external_task_definitions ? [] : aws_ecs_task_definition.solr_node[*].family
+  value       = var.use_external_task_definitions ? [] : aws_ecs_task_definition.solr_fargate_td[*].family
 }
 
 output "zookeeper_task_definition_arns" {
   description = "List of ARNs for Zookeeper node task definitions (Terraform-managed or external)"
-  value       = var.deploy_zookeeper && !var.use_external_task_definitions ? aws_ecs_task_definition.zookeeper_node[*].arn : (var.use_external_task_definitions ? var.zookeeper_task_def_arns : [])
+  value       = var.deploy_zookeeper && !var.use_external_task_definitions ? aws_ecs_task_definition.zookeeper_fargate_td[*].arn : (var.use_external_task_definitions ? var.zookeeper_task_def_arns : [])
 }
 
 output "zookeeper_task_definition_families" {
   description = "List of family names for Zookeeper node task definitions (empty when using external task definitions)"
-  value       = var.deploy_zookeeper && !var.use_external_task_definitions ? aws_ecs_task_definition.zookeeper_node[*].family : []
+  value       = var.deploy_zookeeper && !var.use_external_task_definitions ? aws_ecs_task_definition.zookeeper_fargate_td[*].family : []
 }

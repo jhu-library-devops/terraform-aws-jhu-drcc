@@ -92,53 +92,9 @@ variable "zk_host_secret_arn" {
   default     = null
 }
 
-variable "zookeeper_host_ssm_arn" {
-  description = "ARN of SSM parameter containing Zookeeper host information (required when use_external_task_definitions = false)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || var.zookeeper_host_ssm_arn != null
-    error_message = "zookeeper_host_ssm_arn is required when use_external_task_definitions = false"
-  }
-}
-
 variable "db_secret_arn" {
   description = "The ARN of the AWS Secrets Manager secret containing the database credentials."
   type        = string
-}
-
-variable "db_credentials_ssm_arn" {
-  description = "ARN of SSM parameter containing database credentials (required when use_external_task_definitions = false)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || var.db_credentials_ssm_arn != null
-    error_message = "db_credentials_ssm_arn is required when use_external_task_definitions = false"
-  }
-}
-
-variable "solr_efs_file_system_id" {
-  description = "EFS file system ID for Solr data volumes (required when use_external_task_definitions = false)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || var.solr_efs_file_system_id != null
-    error_message = "solr_efs_file_system_id is required when use_external_task_definitions = false"
-  }
-}
-
-variable "zookeeper_efs_file_system_id" {
-  description = "EFS file system ID for Zookeeper data volumes (required when use_external_task_definitions = false and deploy_zookeeper = true)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || !var.deploy_zookeeper || var.zookeeper_efs_file_system_id != null
-    error_message = "zookeeper_efs_file_system_id is required when use_external_task_definitions = false and deploy_zookeeper = true"
-  }
 }
 
 variable "desired_task_count" {
@@ -189,17 +145,6 @@ variable "solr_image_tag" {
   default     = "latest"
 }
 
-variable "solr_image" {
-  description = "Docker image URI for Solr (required when use_external_task_definitions = false)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || var.solr_image != null
-    error_message = "solr_image is required when use_external_task_definitions = false"
-  }
-}
-
 variable "solr_cpu" {
   description = "The CPU units for the Solr task."
   type        = number
@@ -212,27 +157,10 @@ variable "solr_memory" {
   default     = 16384
 }
 
-variable "solr_opts" {
-  description = "JVM tuning parameters for Solr (e.g., heap size settings)."
-  type        = string
-  default     = "-Xms8g -Xmx8g"
-}
-
 variable "deploy_zookeeper" {
   description = "Whether to deploy a Zookeeper service."
   type        = bool
   default     = false
-}
-
-variable "zookeeper_image" {
-  description = "Docker image URI for Zookeeper (required when use_external_task_definitions = false and deploy_zookeeper = true)."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.use_external_task_definitions || !var.deploy_zookeeper || var.zookeeper_image != null
-    error_message = "zookeeper_image is required when use_external_task_definitions = false and deploy_zookeeper = true"
-  }
 }
 
 variable "zookeeper_cpu" {
@@ -245,12 +173,6 @@ variable "zookeeper_memory" {
   description = "The memory (in MiB) for the Zookeeper task."
   type        = number
   default     = 1024
-}
-
-variable "zookeeper_jvmflags" {
-  description = "JVM tuning parameters for Zookeeper (e.g., heap size settings)."
-  type        = string
-  default     = ""
 }
 
 variable "solr_image_override" {
