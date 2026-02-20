@@ -20,6 +20,7 @@ locals {
   # Computed ECR repository names using organization variable
   ecr_repositories = length(var.ecr_repositories) > 0 ? var.ecr_repositories : [
     "${var.organization}/dspace",
+    "${var.organization}/dspace-angular",
     "${var.organization}/solr",
     "${var.organization}/zookeeper"
   ]
