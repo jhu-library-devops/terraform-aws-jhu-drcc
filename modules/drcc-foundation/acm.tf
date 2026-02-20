@@ -13,6 +13,11 @@ resource "aws_acm_certificate" "main" {
 
   lifecycle {
     create_before_destroy = true
+
+    precondition {
+      condition     = var.public_domain != null && var.public_domain != ""
+      error_message = "Variable 'public_domain' must be set to a non-empty value when 'create_ssl_certificate' is true."
+    }
   }
 }
 
