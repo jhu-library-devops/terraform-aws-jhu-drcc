@@ -36,5 +36,11 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Test dependencies
+test/node_modules/
+
 # Kiro
 .kiro/
+
+# Kiro MCP Manager - Sensitive configuration files
+.kiro/settings/
