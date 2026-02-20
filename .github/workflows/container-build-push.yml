@@ -78,10 +78,12 @@ jobs:
         if: inputs.image == 'dspace'
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: docker/dspace/Dockerfile
+          context: modules/dspace-app-services/docker/dspace
+          file: modules/dspace-app-services/docker/dspace/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
+          build-args: |
+            DSPACE_VERSION=${{ inputs.upstream_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -90,10 +92,12 @@ jobs:
         if: inputs.image == 'dspace-angular'
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: docker/dspace-angular/Dockerfile
+          context: modules/dspace-app-services/docker/dspace-angular
+          file: modules/dspace-app-services/docker/dspace-angular/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
+          build-args: |
+            DSPACE_VERSION=${{ inputs.upstream_version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -102,8 +106,8 @@ jobs:
         if: inputs.image == 'solr'
         uses: docker/build-push-action@v6
         with:
-          context: docker/solr
-          file: docker/solr/Dockerfile
+          context: modules/solr-search-cluster/docker/solr
+          file: modules/solr-search-cluster/docker/solr/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
           build-args: |
@@ -116,8 +120,8 @@ jobs:
         if: inputs.image == 'zookeeper'
         uses: docker/build-push-action@v6
         with:
-          context: docker/zookeeper
-          file: docker/zookeeper/Dockerfile
+          context: modules/solr-search-cluster/docker/zookeeper
+          file: modules/solr-search-cluster/docker/zookeeper/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
           build-args: |
