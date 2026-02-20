@@ -1,5 +1,5 @@
 locals {
-  dspace_api_service_name     = length(aws_ecs_service.dspace_api_service) > 0 ? aws_ecs_service.dspace_api_service[0].name : ""
+  dspace_api_service_name     = aws_ecs_service.dspace_api_service.name
   dspace_angular_service_name = aws_ecs_service.dspace_angular_service.name
   cluster_name                = split("/", var.ecs_cluster_arn)[1]
 

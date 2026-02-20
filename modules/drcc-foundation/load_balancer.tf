@@ -30,7 +30,7 @@ data "aws_iam_policy_document" "alb_logs" {
       type        = "Service"
       identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
     }
-    actions   = ["s3:PutObject"]
+    actions = ["s3:PutObject"]
     resources = [
       "${aws_s3_bucket.alb_logs[0].arn}/${local.alb_log_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/*",
       "${aws_s3_bucket.alb_logs[0].arn}/private-${local.alb_log_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"

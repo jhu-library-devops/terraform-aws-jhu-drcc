@@ -16,11 +16,11 @@ provider "aws" {
 module "foundation" {
   source = "../../modules/drcc-foundation"
 
-  organization   = var.organization
-  project_name   = var.project_name
-  environment    = var.environment
-  aws_region     = var.aws_region
-  public_domain  = var.public_domain
+  organization  = var.organization
+  project_name  = var.project_name
+  environment   = var.environment
+  aws_region    = var.aws_region
+  public_domain = var.public_domain
 
   # VPC Configuration
   create_vpc           = true
@@ -84,15 +84,15 @@ module "dspace_app" {
   aws_region   = var.aws_region
 
   # Infrastructure dependencies from foundation
-  vpc_id                   = module.foundation.vpc_id
-  private_subnet_ids       = module.foundation.private_subnet_ids
-  ecs_cluster_id           = module.foundation.ecs_cluster_id
-  ecs_cluster_arn          = module.foundation.ecs_cluster_arn
-  ecs_security_group_id    = module.foundation.ecs_security_group_id
+  vpc_id                      = module.foundation.vpc_id
+  private_subnet_ids          = module.foundation.private_subnet_ids
+  ecs_cluster_id              = module.foundation.ecs_cluster_id
+  ecs_cluster_arn             = module.foundation.ecs_cluster_arn
+  ecs_security_group_id       = module.foundation.ecs_security_group_id
   ecs_task_execution_role_arn = module.foundation.ecs_task_execution_role_arn
   ecs_task_role_arn           = module.foundation.ecs_task_role_arn
-  alb_https_listener_arn   = module.foundation.alb_https_listener_arn
-  private_alb_listener_arn = module.foundation.private_alb_listener_arn
+  alb_https_listener_arn      = module.foundation.alb_https_listener_arn
+  private_alb_listener_arn    = module.foundation.private_alb_listener_arn
 
   # Initialization configuration
   enable_init_tasks = var.enable_init_tasks

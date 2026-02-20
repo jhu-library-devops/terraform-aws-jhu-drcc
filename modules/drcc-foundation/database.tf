@@ -54,11 +54,11 @@ resource "aws_db_instance" "main" {
   vpc_security_group_ids = [aws_security_group.rds[0].id]
   publicly_accessible    = false
 
-  multi_az                   = var.db_multi_az
-  backup_retention_period    = var.db_backup_retention_period
-  deletion_protection        = var.db_deletion_protection
-  skip_final_snapshot        = var.db_skip_final_snapshot
-  final_snapshot_identifier  = var.db_skip_final_snapshot ? null : "${local.name}-db-final-snapshot"
+  multi_az                  = var.db_multi_az
+  backup_retention_period   = var.db_backup_retention_period
+  deletion_protection       = var.db_deletion_protection
+  skip_final_snapshot       = var.db_skip_final_snapshot
+  final_snapshot_identifier = var.db_skip_final_snapshot ? null : "${local.name}-db-final-snapshot"
 
   tags = merge(local.tags, { Name = "${local.name}-db" })
 

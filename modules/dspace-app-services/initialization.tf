@@ -15,7 +15,7 @@ resource "aws_ecs_task_definition" "db_init" {
     {
       name  = "db-init"
       image = var.dspace_api_image != null ? var.dspace_api_image : "dspace/dspace:latest"
-      
+
       command = [
         "/bin/bash",
         "-c",
@@ -80,7 +80,7 @@ resource "aws_ecs_task_definition" "solr_init" {
     {
       name  = "solr-init"
       image = var.dspace_api_image != null ? var.dspace_api_image : "dspace/dspace:latest"
-      
+
       command = [
         "/bin/bash",
         "-c",
@@ -157,12 +157,12 @@ resource "aws_lambda_function" "run_init_tasks" {
 
   environment {
     variables = {
-      CLUSTER_ARN           = var.ecs_cluster_arn
-      DB_INIT_TASK_DEF      = aws_ecs_task_definition.db_init.arn
-      SOLR_INIT_TASK_DEF    = aws_ecs_task_definition.solr_init.arn
-      SUBNET_IDS            = jsonencode(var.private_subnet_ids)
-      SECURITY_GROUP_ID     = var.ecs_security_group_id
-      ENABLE_PUBLIC_IP      = "false"
+      CLUSTER_ARN        = var.ecs_cluster_arn
+      DB_INIT_TASK_DEF   = aws_ecs_task_definition.db_init.arn
+      SOLR_INIT_TASK_DEF = aws_ecs_task_definition.solr_init.arn
+      SUBNET_IDS         = jsonencode(var.private_subnet_ids)
+      SECURITY_GROUP_ID  = var.ecs_security_group_id
+      ENABLE_PUBLIC_IP   = "false"
     }
   }
 

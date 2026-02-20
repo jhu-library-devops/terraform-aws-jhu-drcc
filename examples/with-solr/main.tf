@@ -16,11 +16,11 @@ provider "aws" {
 module "foundation" {
   source = "../../modules/drcc-foundation"
 
-  organization   = var.organization
-  project_name   = var.project_name
-  environment    = var.environment
-  aws_region     = var.aws_region
-  public_domain  = var.public_domain
+  organization  = var.organization
+  project_name  = var.project_name
+  environment   = var.environment
+  aws_region    = var.aws_region
+  public_domain = var.public_domain
 
   # VPC Configuration
   create_vpc           = true
