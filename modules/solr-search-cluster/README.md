@@ -211,23 +211,276 @@ See the [examples](../../examples/) directory for complete usage examples:
 - [With Solr](../../examples/with-solr/) - Foundation + Solr cluster
 - [Complete](../../examples/complete/) - Full DSpace deployment with Solr
 
+## Task Definition Management
+
+This module supports two modes for managing ECS task definitions, controlled by the `use_external_task_definitions` variable.
+
+### Mode 1: External Task Definitions
+
+Set `use_external_task_definitions = true` to manage task definitions outside Terraform (e.g., via CI/CD pipelines). This allows image updates without Terraform drift.
+
+**Required Variables:**
+- `solr_task_def_arns` - List of ARNs for Solr node task definitions (length must match `solr_node_count`)
+- `zookeeper_task_def_arns` - List of ARNs for Zookeeper node task definitions (required if `deploy_zookeeper = true`)
+
+**Example:**
+```hcl
+use_external_task_definitions = true
+solr_node_count               = 3
+solr_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-1:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-2:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-3:25"
+]
+
+deploy_zookeeper = true
+zookeeper_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-1:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-2:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-3:18"
+]
+```
+
+### Mode 2: Terraform-Managed Task Definitions (Default)
+
+Set `use_external_task_definitions = false` (default) to let Terraform create and manage task definitions. Useful for initial setup or environments without CI/CD pipelines.
+
+**Required Variables:**
+- `solr_image` - Docker image URI for Solr
+- `solr_efs_file_system_id` - EFS file system ID for Solr data volumes
+- `zookeeper_host_ssm_arn` - ARN of SSM parameter containing Zookeeper host information
+- `db_credentials_ssm_arn` - ARN of SSM parameter containing database credentials
+- `zookeeper_image` - Docker image URI for Zookeeper (if `deploy_zookeeper = true`)
+- `zookeeper_efs_file_system_id` - EFS file system ID for Zookeeper data (if `deploy_zookeeper = true`)
+
+**Optional Variables:**
+- `solr_cpu` / `solr_memory` - Resource allocation (defaults: 2048 CPU, 16384 MB)
+- `solr_opts` - JVM tuning parameters (default: "-Xms8g -Xmx8g")
+- `zookeeper_cpu` / `zookeeper_memory` - Resource allocation (defaults: 512 CPU, 1024 MB)
+- `zookeeper_jvmflags` - JVM tuning parameters for Zookeeper
+
+**Example:**
+```hcl
+use_external_task_definitions = false
+
+# Solr configuration
+solr_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/solr:9.4.0"
+solr_node_count         = 3
+solr_cpu                = 2048
+solr_memory             = 16384
+solr_opts               = "-Xms12g -Xmx12g"  # Production tuning
+solr_efs_file_system_id = "fs-0123456789abcdef0"
+
+# Zookeeper configuration
+deploy_zookeeper             = true
+zookeeper_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/zookeeper:3.9"
+zookeeper_task_count         = 3
+zookeeper_cpu                = 512
+zookeeper_memory             = 1024
+zookeeper_jvmflags           = "-Xms512m -Xmx512m"
+zookeeper_efs_file_system_id = "fs-0fedcba9876543210"
+
+# SSM parameter ARNs
+zookeeper_host_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/zk-host"
+db_credentials_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/db-credentials"
+```
+
+### JVM Tuning Recommendations
+
+**Solr (`solr_opts`):**
+- **Development/Stage:** `-Xms8g -Xmx8g` (8GB heap)
+- **Production:** `-Xms12g -Xmx12g` (12GB heap) or higher based on workload
+- Ensure heap size is ~50-75% of container memory allocation
+- Additional options: `-XX:+UseG1GC -XX:MaxGCPauseMillis=200`
+
+**Zookeeper (`zookeeper_jvmflags`):**
+- **Development/Stage:** `-Xms512m -Xmx512m` (512MB heap)
+- **Production:** `-Xms1g -Xmx1g` (1GB heap)
+- Zookeeper is less memory-intensive than Solr
+
+### Lifecycle Policies
+
+Task definitions include `lifecycle { ignore_changes = [container_definitions] }` to prevent Terraform from detecting drift when CI/CD pipelines update container images. Non-image configuration changes (CPU, memory, volumes) still trigger Terraform updates.
+
+## Migration Guide
+
+### Migrating from External to Terraform-Managed Task Definitions
+
+**Step 1: Prepare Configuration**
+
+Add required variables to your `.tfvars` file:
+
+```hcl
+use_external_task_definitions = false
+
+# Solr configuration
+solr_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/solr:9.4.0"
+solr_node_count         = 3
+solr_cpu                = 2048
+solr_memory             = 16384
+solr_opts               = "-Xms12g -Xmx12g"
+solr_efs_file_system_id = "fs-0123456789abcdef0"
+
+# Zookeeper configuration (if deployed)
+deploy_zookeeper             = true
+zookeeper_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/zookeeper:3.9"
+zookeeper_task_count         = 3
+zookeeper_cpu                = 512
+zookeeper_memory             = 1024
+zookeeper_jvmflags           = "-Xms512m -Xmx512m"
+zookeeper_efs_file_system_id = "fs-0fedcba9876543210"
+
+# SSM parameter ARNs
+zookeeper_host_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/zk-host"
+db_credentials_ssm_arn = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/db-credentials"
+```
+
+**Step 2: Create SSM Parameters**
+
+Ensure required SSM parameters exist:
+
+```bash
+aws ssm put-parameter --name /dspace/prod/zk-host \
+  --value "zookeeper-1.dspace-prod.local:2181,zookeeper-2.dspace-prod.local:2181,zookeeper-3.dspace-prod.local:2181" \
+  --type SecureString
+
+aws ssm put-parameter --name /dspace/prod/db-credentials \
+  --value "arn:aws:secretsmanager:us-east-1:123456789012:secret:dspace-db-credentials" \
+  --type SecureString
+```
+
+**Step 3: Plan and Apply**
+
+```bash
+terraform plan -var-file=prod.tfvars
+# Review: Should show task definition resources being created (3 Solr + 3 Zookeeper)
+# Services should show no changes (task_definition ignored by lifecycle)
+
+terraform apply -var-file=prod.tfvars
+```
+
+**Step 4: Update CI/CD Pipelines**
+
+Modify workflows to register new revisions using Terraform-managed family names:
+
+```bash
+# Example: Update Solr node 1 task definition
+aws ecs register-task-definition \
+  --family jhu-prod-solr-1 \
+  --cli-input-json file://solr-1-task-def.json
+
+# Update service
+aws ecs update-service \
+  --cluster dspace-prod-cluster \
+  --service dspace-prod-solr-1-service \
+  --task-definition jhu-prod-solr-1:26
+```
+
+### Migrating from Terraform-Managed to External Task Definitions
+
+**Step 1: Export Current Task Definitions**
+
+```bash
+# Export all Solr node task definitions
+for i in 1 2 3; do
+  aws ecs describe-task-definition \
+    --task-definition jhu-prod-solr-$i \
+    --query 'taskDefinition' > solr-$i-task-def.json
+done
+
+# Export Zookeeper task definitions (if deployed)
+for i in 1 2 3; do
+  aws ecs describe-task-definition \
+    --task-definition jhu-prod-zookeeper-$i \
+    --query 'taskDefinition' > zookeeper-$i-task-def.json
+done
+```
+
+**Step 2: Update Configuration**
+
+```hcl
+use_external_task_definitions = true
+
+# Provide current task definition ARNs
+solr_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-1:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-2:25",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-solr-3:25"
+]
+
+zookeeper_task_def_arns = [
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-1:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-2:18",
+  "arn:aws:ecs:us-east-1:123456789012:task-definition/jhu-prod-zookeeper-3:18"
+]
+
+# Remove Terraform-managed variables (no longer needed)
+# solr_image = ...
+# zookeeper_image = ...
+# etc.
+```
+
+**Step 3: Plan and Apply**
+
+```bash
+terraform plan -var-file=prod.tfvars
+# Review: Should show task definition resources being destroyed
+# Services should show no changes
+
+terraform apply -var-file=prod.tfvars
+```
+
+**Step 4: Set Up External Task Definition Management**
+
+Store task definition JSON files in version control and configure CI/CD to manage them independently.
+
+### Rollback Instructions
+
+If issues occur after migration:
+
+**From Terraform-Managed Back to External:**
+1. Get current task definition ARNs from ECS console
+2. Update `.tfvars` with `use_external_task_definitions = true` and the ARN lists
+3. Run `terraform apply` - Terraform destroys its task definitions but services continue using the ARNs
+
+**From External Back to Terraform-Managed:**
+1. Ensure all SSM parameters and EFS file systems exist
+2. Update `.tfvars` with `use_external_task_definitions = false` and required variables
+3. Run `terraform apply` - Terraform creates new task definitions
+4. Services continue using external ARNs until next deployment (lifecycle policy prevents automatic updates)
+5. Manually update services to use new Terraform-managed task definitions if needed
+
+### CI/CD Compatibility
+
+Both modes support CI/CD workflows:
+
+- **External Mode:** CI/CD registers task definitions and updates services directly
+- **Terraform-Managed Mode:** CI/CD registers new revisions of Terraform-managed families, then updates services
+
+The `lifecycle { ignore_changes = [container_definitions] }` policy ensures Terraform doesn't interfere with CI/CD image updates in either mode.
+
 ## Configuration Recommendations
 
 ### Development
 ```hcl
-solr_node_count      = 1
-deploy_zookeeper     = false  # Use embedded Zookeeper
-solr_cpu             = "1024"
-solr_memory          = "2048"
+use_external_task_definitions = false
+solr_node_count               = 1
+deploy_zookeeper              = false  # Use embedded Zookeeper
+solr_cpu                      = 1024
+solr_memory                   = 2048
+solr_opts                     = "-Xms1g -Xmx1g"
 ```
 
 ### Production
 ```hcl
-solr_node_count      = 5      # Odd number for quorum
-deploy_zookeeper     = true
-zookeeper_task_count = 3      # 3 or 5 recommended
-solr_cpu             = "4096"
-solr_memory          = "8192"
+use_external_task_definitions = false  # or true with CI/CD
+solr_node_count               = 5      # Odd number for quorum
+deploy_zookeeper              = true
+zookeeper_task_count          = 3      # 3 or 5 recommended
+solr_cpu                      = 4096
+solr_memory                   = 16384
+solr_opts                     = "-Xms12g -Xmx12g"
+zookeeper_jvmflags            = "-Xms1g -Xmx1g"
 ```
 
 ## Notes
