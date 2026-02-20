@@ -106,8 +106,7 @@ jobs:
           file: docker/solr/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
-          build-args: |
-            SOLR_VERSION=${{ inputs.upstream_version }}
+          build-args: ${{ inputs.upstream_version && format('SOLR_VERSION={0}', inputs.upstream_version) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -120,8 +119,7 @@ jobs:
           file: docker/zookeeper/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.full_image }}
-          build-args: |
-            ZK_VERSION=${{ inputs.upstream_version }}
+          build-args: ${{ inputs.upstream_version && format('ZK_VERSION={0}', inputs.upstream_version) || '' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
