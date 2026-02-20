@@ -75,10 +75,6 @@ dspace_jobs_memory   = 8192                  # [OPTIONAL] Jobs service memory (d
 solr_cpu             = 2048                  # [OPTIONAL] Solr CPU per node (default: 2048)
 solr_memory          = 16384                 # [OPTIONAL] Solr memory per node (default: 16384)
 
-# --- Solr JVM Tuning (OPTIONAL) ---
-# JVM heap settings for Solr. Stage uses 8GB heap (half of 16GB memory allocation).
-solr_opts = "-Xms8g -Xmx8g"                  # [OPTIONAL] Solr JVM options (default: "-Xms8g -Xmx8g")
-
 # --- SSM Parameter ARNs for Secrets (REQUIRED when use_external_task_definitions = false) ---
 # ARNs of AWS Systems Manager Parameter Store parameters containing sensitive configuration.
 # Replace ACCOUNT_ID with your AWS account ID.
@@ -114,8 +110,6 @@ dspace_rest_ssr_url_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dsp
 dspace_angular_node_opts_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/angular/node-opts"
 
 # Solr and Zookeeper secrets
-zookeeper_host_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/zookeeper/host"
-db_credentials_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/db/credentials"
 
 # --- CloudWatch Log Groups (OPTIONAL) ---
 # Log group names for container logs. If not specified, defaults will be used.
