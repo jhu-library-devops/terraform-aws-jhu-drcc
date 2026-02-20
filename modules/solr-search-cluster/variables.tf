@@ -241,8 +241,8 @@ variable "solr_task_def_arns" {
   default     = []
 
   validation {
-    condition     = !var.use_external_task_definitions || length(var.solr_task_def_arns) > 0
-    error_message = "solr_task_def_arns is required when use_external_task_definitions = true. Provide a list of task definition ARNs matching the number of Solr nodes."
+    condition     = !var.use_external_task_definitions || length(var.solr_task_def_arns) == var.solr_node_count
+    error_message = "solr_task_def_arns must contain exactly solr_node_count ARNs when use_external_task_definitions = true."
   }
 }
 
@@ -252,8 +252,8 @@ variable "zookeeper_task_def_arns" {
   default     = []
 
   validation {
-    condition     = !var.use_external_task_definitions || !var.deploy_zookeeper || length(var.zookeeper_task_def_arns) > 0
-    error_message = "zookeeper_task_def_arns is required when use_external_task_definitions = true and deploy_zookeeper = true. Provide a list of task definition ARNs matching the number of Zookeeper nodes."
+    condition     = !var.use_external_task_definitions || !var.deploy_zookeeper || length(var.zookeeper_task_def_arns) == var.zookeeper_task_count
+    error_message = "zookeeper_task_def_arns must contain exactly zookeeper_task_count ARNs when use_external_task_definitions = true and deploy_zookeeper = true."
   }
 }
 
