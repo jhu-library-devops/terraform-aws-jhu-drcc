@@ -127,22 +127,22 @@ output "ecs_task_role_arn" {
 # Database Outputs
 output "db_instance_id" {
   description = "The ID of the RDS instance"
-  value       = var.deploy_database ? aws_db_instance.main[0].id : null
+  value       = module.dspace_app_services.db_instance_id
 }
 
 output "db_instance_identifier" {
   description = "The identifier of the RDS instance"
-  value       = var.deploy_database ? aws_db_instance.main[0].identifier : null
+  value       = module.dspace_app_services.db_instance_identifier
 }
 
 output "db_instance_endpoint" {
   description = "The endpoint of the RDS instance"
-  value       = var.deploy_database ? aws_db_instance.main[0].endpoint : null
+  value       = module.dspace_app_services.db_instance_endpoint
 }
 
 output "db_credentials_secret_arn" {
   description = "The ARN of the database credentials secret"
-  value       = local.db_secret_arn_final
+  value       = module.dspace_app_services.db_credentials_secret_arn
 }
 
 # Route53 Outputs

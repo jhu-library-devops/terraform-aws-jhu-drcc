@@ -166,3 +166,26 @@ output "dashboard_url" {
   description = "The URL to access the CloudWatch dashboard"
   value       = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#dashboards:name=${aws_cloudwatch_dashboard.dspace_application.dashboard_name}"
 }
+
+# -----------------------------------------------------------------------------
+# Database Outputs
+# -----------------------------------------------------------------------------
+output "db_instance_id" {
+  description = "The ID of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].id : null
+}
+
+output "db_instance_identifier" {
+  description = "The identifier of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].identifier : null
+}
+
+output "db_instance_endpoint" {
+  description = "The endpoint of the RDS instance"
+  value       = var.deploy_database ? aws_db_instance.main[0].endpoint : null
+}
+
+output "db_credentials_secret_arn" {
+  description = "The ARN of the database credentials secret"
+  value       = local.db_secret_arn_final
+}

@@ -419,3 +419,82 @@ variable "dspace_jobs_log_group_name" {
   type        = string
   default     = null
 }
+
+# Database Configuration
+variable "deploy_database" {
+  description = "If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`."
+  type        = bool
+  default     = false
+}
+
+variable "db_instance_class" {
+  description = "The instance class for the RDS database."
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "The allocated storage in gigabytes for the RDS database."
+  type        = number
+  default     = 20
+}
+
+variable "db_name" {
+  description = "The name of the database to create in the RDS instance."
+  type        = string
+  default     = "dspace"
+}
+
+variable "db_username" {
+  description = "The master username for the RDS database."
+  type        = string
+  default     = "dspaceuser"
+}
+
+variable "db_multi_az" {
+  description = "Specifies if the RDS instance is multi-AZ. Should be true for production."
+  type        = bool
+  default     = false
+}
+
+variable "db_engine_version" {
+  description = "The engine version of the RDS instance."
+  type        = string
+  default     = "17.4"
+}
+
+variable "db_backup_retention_period" {
+  description = "The days to retain backups for. Must be > 0 to enable backups. Recommended: 7+ for production."
+  type        = number
+  default     = 7
+}
+
+variable "db_deletion_protection" {
+  description = "If the DB instance should have deletion protection enabled. Should be true for production."
+  type        = bool
+  default     = false
+}
+
+variable "db_skip_final_snapshot" {
+  description = "Determines whether a final DB snapshot is created before the DB instance is deleted. Should be false for production."
+  type        = bool
+  default     = true
+}
+
+variable "db_instance_identifier" {
+  description = "The identifier of an existing RDS instance to use. Required if `deploy_database` is false."
+  type        = string
+  default     = null
+}
+
+variable "db_credentials_secret_arn_override" {
+  description = "The ARN of an existing Secrets Manager secret containing database credentials."
+  type        = string
+  default     = null
+}
+
+variable "db_secret_rotation_type" {
+  description = "The type of database secret rotation (manual or automatic)."
+  type        = string
+  default     = "manual"
+}

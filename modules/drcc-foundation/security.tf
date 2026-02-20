@@ -129,22 +129,3 @@ resource "aws_vpc_security_group_egress_rule" "ecs_service_egress" {
   cidr_ipv4   = "0.0.0.0/0"
 }
 
-resource "aws_security_group" "rds" {
-  count       = var.deploy_database ? 1 : 0
-  name        = "${local.name}-rds-sg"
-  description = "Allow traffic to the RDS instance from the ECS service"
-  vpc_id      = local.vpc_id
-
-  tags = merge(local.tags, { Name = "${local.name}-rds-sg" })
-}
-
-resource "aws_vpc_security_group_ingress_rule" "db_ingress_rule" {
-  count             = var.deploy_database ? 1 : 0
-  security_group_id = aws_security_group.rds[0].id
-
-  description                  = "Allow Postgres traffic from the ECS service"
-  from_port                    = 5432
-  to_port                      = 5432
-  ip_protocol                  = "tcp"
-  referenced_security_group_id = aws_security_group.ecs_service_sg.id
-}
