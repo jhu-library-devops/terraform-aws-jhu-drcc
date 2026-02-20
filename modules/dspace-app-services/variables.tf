@@ -223,6 +223,12 @@ variable "dspace_admin_password" {
   sensitive   = true
 }
 
+variable "dspace_admin_password_secret_arn" {
+  description = "ARN of a Secrets Manager secret containing the DSpace administrator password as a plaintext string. When provided, the password is injected securely at runtime rather than stored in the task definition. The secret value must be the password string itself (not a JSON object)."
+  type        = string
+  default     = null
+}
+
 variable "db_secret_arn" {
   description = "ARN of the Secrets Manager secret containing database credentials"
   type        = string

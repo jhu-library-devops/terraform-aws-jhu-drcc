@@ -19,7 +19,7 @@ resource "aws_ecs_task_definition" "db_init" {
       command = [
         "/bin/bash",
         "-c",
-        "dspace database migrate && dspace create-administrator -e ${var.dspace_admin_email} -f ${var.dspace_admin_first_name} -l ${var.dspace_admin_last_name} -p ${var.dspace_admin_password != null ? var.dspace_admin_password : "changeme"} -c en"
+        "dspace database migrate && dspace create-administrator -e ${var.dspace_admin_email} -f ${var.dspace_admin_first_name} -l ${var.dspace_admin_last_name} -p $DSPACE_ADMIN_PASSWORD -c en"
       ]
 
       logConfiguration = {
@@ -31,35 +31,51 @@ resource "aws_ecs_task_definition" "db_init" {
         }
       }
 
-      environment = [
-        {
-          name  = "DSPACE_INSTALL_DIR"
-          value = "/dspace"
-        }
-      ]
+      environment = concat(
+        [
+          {
+            name  = "DSPACE_INSTALL_DIR"
+            value = "/dspace"
+          }
+        ],
+        var.dspace_admin_password_secret_arn == null ? [
+          {
+            name  = "DSPACE_ADMIN_PASSWORD"
+            value = coalesce(var.dspace_admin_password, "changeme")
+          }
+        ] : []
+      )
 
-      secrets = var.db_secret_arn != null ? [
-        {
-          name      = "DB_HOST"
-          valueFrom = "${var.db_secret_arn}:host::"
-        },
-        {
-          name      = "DB_PORT"
-          valueFrom = "${var.db_secret_arn}:port::"
-        },
-        {
-          name      = "DB_NAME"
-          valueFrom = "${var.db_secret_arn}:dbname::"
-        },
-        {
-          name      = "DB_USER"
-          valueFrom = "${var.db_secret_arn}:username::"
-        },
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "${var.db_secret_arn}:password::"
-        }
-      ] : []
+      secrets = concat(
+        var.db_secret_arn != null ? [
+          {
+            name      = "DB_HOST"
+            valueFrom = "${var.db_secret_arn}:host::"
+          },
+          {
+            name      = "DB_PORT"
+            valueFrom = "${var.db_secret_arn}:port::"
+          },
+          {
+            name      = "DB_NAME"
+            valueFrom = "${var.db_secret_arn}:dbname::"
+          },
+          {
+            name      = "DB_USER"
+            valueFrom = "${var.db_secret_arn}:username::"
+          },
+          {
+            name      = "DB_PASSWORD"
+            valueFrom = "${var.db_secret_arn}:password::"
+          }
+        ] : [],
+        var.dspace_admin_password_secret_arn != null ? [
+          {
+            name      = "DSPACE_ADMIN_PASSWORD"
+            valueFrom = var.dspace_admin_password_secret_arn
+          }
+        ] : []
+      )
     }
   ])
 
