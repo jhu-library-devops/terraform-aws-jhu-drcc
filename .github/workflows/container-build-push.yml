@@ -58,8 +58,11 @@ jobs:
 
           # Map image name to ECR repository name
           case "$IMAGE" in
-            dspace|dspace-angular)
+            dspace)
               REPO_NAME="${ORG}/dspace"
+              ;;
+            dspace-angular)
+              REPO_NAME="${ORG}/dspace-angular"
               ;;
             solr)
               REPO_NAME="${ORG}/solr"
