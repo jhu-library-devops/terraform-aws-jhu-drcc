@@ -1,6 +1,6 @@
 # JHU DRCC Terraform Modules
 
-Reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff.
+A Terraform module library providing reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff.
 
 ## Modules
 
@@ -9,6 +9,10 @@ Reusable Terraform/OpenTofu modules for deploying containerized applications on 
 | [drcc-foundation](./modules/drcc-foundation/) | VPC, ECS cluster, ALBs, RDS, IAM, WAF, service discovery | None |
 | [solr-search-cluster](./modules/solr-search-cluster/) | Multi-node Solr cluster with Zookeeper on ECS/EFS | drcc-foundation |
 | [dspace-app-services](./modules/dspace-app-services/) | DSpace Angular UI, REST API, background jobs, S3 asset store | drcc-foundation |
+
+## Quickstart
+
+See [examples/GETTING_STARTED.md](./examples/GETTING_STARTED.md)
 
 ## Architecture
 
@@ -208,31 +212,3 @@ Contributions are welcome from JHU DRCC staff and faculty. We are not currently 
 ## License
 
 [MIT](./LICENSE)
-
-<!-- BEGIN_TF_DOCS -->
-
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-<!-- END_TF_DOCS -->
