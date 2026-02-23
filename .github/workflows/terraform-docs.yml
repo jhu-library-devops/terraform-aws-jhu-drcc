@@ -28,11 +28,9 @@ jobs:
       - name: Generate Terraform docs
         uses: terraform-docs/gh-actions@v1.2.0
         with:
-          working-dir: .
+          find-dir: modules
           output-file: README.md
           output-method: inject
-          recursive: true
-          recursive-path: modules
           git-push: true
           git-commit-message: "docs: update Terraform module documentation"
 
