@@ -2,6 +2,8 @@
 
 Reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff.
 
+**Lines of code (excluding READMEs and documentation): 11,111** *(as of February 2026)*
+
 ## Modules
 
 | Module | Purpose | Dependencies |
