@@ -202,8 +202,7 @@ Contributions are welcome from JHU DRCC staff and faculty. We are not currently 
 
 ## Support
 
-- Slack: #dev-ops (JHU Libraries)
-- [GitHub Issues](https://github.com/jhu/terraform-aws-jhu-drcc/issues)
+[GitHub Issues](https://github.com/jhu-library-devops/terraform-aws-jhu-drcc/issues)
 
 ## License
 
