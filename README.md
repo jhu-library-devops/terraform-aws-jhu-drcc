@@ -2,7 +2,6 @@
 
 Reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff.
 
-**Lines of code (excluding READMEs and documentation): 11,111** *(as of February 2026)*
 
 ## Modules
 
@@ -75,6 +74,8 @@ graph TB
 
 ### Deploy
 
+Refer to the [Production Deployment Guide](./examples/complete/PRODUCTION.md) for hardening, scaling, and operational guidance.
+
 ```bash
 git clone https://github.com/jhu/terraform-aws-jhu-drcc.git
 cd terraform-aws-jhu-drcc/examples/complete
@@ -90,8 +91,6 @@ tofu apply -target=module.foundation -var-file=prod.tfvars
 tofu apply -target=module.solr -var-file=prod.tfvars
 tofu apply -target=module.dspace_app -var-file=prod.tfvars
 ```
-
-See the [Production Deployment Guide](./examples/complete/PRODUCTION.md) for hardening, scaling, and operational guidance.
 
 ## Usage
 
@@ -204,37 +203,10 @@ Contributions are welcome from JHU DRCC staff and faculty. We are not currently 
 ## Support
 
 - Slack: #dev-ops (JHU Libraries)
-- Email: devops@library.jhu.edu
 - [GitHub Issues](https://github.com/jhu/terraform-aws-jhu-drcc/issues)
 
 ## License
 
 [MIT](./LICENSE)
 
-<!-- BEGIN_TF_DOCS -->
-
-
-## Requirements
-
-No requirements.
-
-## Providers
-
-No providers.
-
-## Modules
-
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-<!-- END_TF_DOCS -->
+**Lines of code (excluding READMEs and documentation): 11,111** *(as of February 2026)*
