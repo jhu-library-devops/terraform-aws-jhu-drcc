@@ -74,11 +74,11 @@ graph TB
 
 ### Deploy
 
-Refer to the [Production Deployment Guide](./examples/complete/PRODUCTION.md) for hardening, scaling, and operational guidance.
+Refer to the [Production Deployment Guide](./examples/dspace-complete/PRODUCTION.md) for hardening, scaling, and operational guidance.
 
 ```bash
 git clone https://github.com/jhu/terraform-aws-jhu-drcc.git
-cd terraform-aws-jhu-drcc/examples/complete
+cd terraform-aws-jhu-drcc/examples/dspace-complete
 
 cp prod.tfvars.example prod.tfvars
 # Edit prod.tfvars — update [REQUIRED] values for your institution
@@ -157,7 +157,7 @@ module "dspace_app" {
 
 | Example | Description |
 |---------|-------------|
-| [complete](./examples/complete/) | Full DSpace stack (foundation + Solr + app services) |
+| [dspace-complete](./examples/dspace-complete/) | Full DSpace stack (foundation + Solr + app services) |
 | [foundation-only](./examples/foundation-only/) | Shared infrastructure without application modules |
 | [with-solr](./examples/with-solr/) | Foundation + Solr cluster without DSpace |
 
