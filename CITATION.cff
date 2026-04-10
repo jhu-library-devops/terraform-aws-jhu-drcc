@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "JHU DRCC Terraform Modules"
+abstract: "Reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff."
+type: software
+license: MIT
+repository-code: "https://github.com/jhu-library-devops/terraform-aws-jhu-drcc"
+url: "https://github.com/jhu-library-devops/terraform-aws-jhu-drcc"
+date-released: "2024-06-18"
+authors:
+  - given-names: Steven J.
+    family-names: Miklovic
+    email: smiklov1@jh.edu
+    affiliation: "Johns Hopkins University"
+  - given-names: Bill
+    family-names: Branan
+    email: bbranan@jhu.edu
+    affiliation: "Johns Hopkins University"
+keywords:
+  - terraform
+  - opentofu
+  - aws
+  - dspace
+  - ecs
+  - fargate
+  - infrastructure-as-code
