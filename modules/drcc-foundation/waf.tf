@@ -120,6 +120,7 @@ resource "aws_wafv2_web_acl" "main" {
       managed_rule_group_statement {
         name        = "AWSManagedRulesBotControlRuleSet"
         vendor_name = "AWS"
+        version     = "Version_5.0"
 
         rule_action_override {
           name = "SignalNonBrowserUserAgent"
@@ -169,7 +170,7 @@ resource "aws_wafv2_web_acl" "main" {
             statement {
               byte_match_statement {
                 positional_constraint = "EXACTLY"
-                search_string         = "Vireo Sword 1.0 Depositor"
+                search_string         = "some-approved-user-agent"
 
                 field_to_match {
                   single_header {
@@ -224,6 +225,27 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
+  rule {
+    name     = "rate-limit-per-ip"
+    priority = 6
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = 2000
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "rate-limit-per-ip"
+      sampled_requests_enabled   = true
+    }
+  }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
