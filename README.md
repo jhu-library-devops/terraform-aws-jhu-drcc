@@ -209,3 +209,31 @@ Contributions are welcome from JHU DRCC staff and faculty. We are not currently 
 [MIT](./LICENSE)
 
 **Lines of code (excluding READMEs and documentation): 11,111** *(as of February 2026)*
+
+<!-- BEGIN_TF_DOCS -->
+
+
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+No inputs.
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->
