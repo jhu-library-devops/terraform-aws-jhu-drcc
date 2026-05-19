@@ -19,6 +19,9 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 
+# Include tfvars that contain only resource IDs (not secrets)
+!examples/jhunet-foundation/*.tfvars
+
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
 override.tf
