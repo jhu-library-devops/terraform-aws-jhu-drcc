@@ -95,7 +95,8 @@ No modules.
 | [aws_cloudwatch_log_group.ecs_tasks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_cluster) | resource |
 | [aws_iam_role.ecs_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.ecs_role_admin](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy.ecs_execute_command](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.ecs_task_execution_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_security_group.ecs_tasks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_vpc_security_group_egress_rule.ecs_tasks_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
@@ -107,17 +108,19 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region where resources reside. | `string` | `"us-east-1"` | no |
 | <a name="input_cloudwatch_log_group_name"></a> [cloudwatch\_log\_group\_name](#input\_cloudwatch\_log\_group\_name) | Name for the CloudWatch log group. Defaults to /ecs/{project}-{env}. | `string` | `null` | no |
+| <a name="input_container_insights_value"></a> [container\_insights\_value](#input\_container\_insights\_value) | Container Insights setting value: disabled, enabled, or enhanced. | `string` | `"disabled"` | no |
 | <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | Name of the ECS cluster. Used for both the resource name and lookups. | `string` | n/a | yes |
 | <a name="input_ecs_role_name"></a> [ecs\_role\_name](#input\_ecs\_role\_name) | Name for the ECS IAM role (used as both task execution and task role). | `string` | `null` | no |
 | <a name="input_ecs_security_group_description"></a> [ecs\_security\_group\_description](#input\_ecs\_security\_group\_description) | Description for the ECS tasks security group. | `string` | `null` | no |
 | <a name="input_ecs_security_group_name"></a> [ecs\_security\_group\_name](#input\_ecs\_security\_group\_name) | Name for the ECS tasks security group. | `string` | `null` | no |
 | <a name="input_egress_cidr_blocks"></a> [egress\_cidr\_blocks](#input\_egress\_cidr\_blocks) | CIDR blocks allowed for outbound traffic from ECS tasks. Defaults to all traffic. | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
-| <a name="input_enable_container_insights"></a> [enable\_container\_insights](#input\_enable\_container\_insights) | Whether to enable CloudWatch Container Insights on the ECS cluster. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., dev, stage, prod). | `string` | n/a | yes |
+| <a name="input_execute_command_logging"></a> [execute\_command\_logging](#input\_execute\_command\_logging) | Logging configuration for ECS Exec. Set to DEFAULT, OVERRIDE, or NONE. Null to omit the block. | `string` | `null` | no |
 | <a name="input_log_retention_days"></a> [log\_retention\_days](#input\_log\_retention\_days) | Number of days to retain CloudWatch logs. | `number` | `30` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name (e.g., jhu). | `string` | `"jhu"` | no |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of existing private subnet IDs for ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | A name for the project used in resource names and tags. | `string` | n/a | yes |
+| <a name="input_service_connect_namespace_arn"></a> [service\_connect\_namespace\_arn](#input\_service\_connect\_namespace\_arn) | ARN of the Cloud Map namespace for Service Connect defaults. Null to omit. | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to all resources. | `map(string)` | `{}` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the existing JHUnet-connected VPC. | `string` | n/a | yes |
 
