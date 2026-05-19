@@ -15,8 +15,10 @@ module "jhunet_foundation" {
   private_subnet_ids = var.private_subnet_ids
 
   # ECS Cluster
-  ecs_cluster_name          = var.ecs_cluster_name
-  enable_container_insights = var.enable_container_insights
+  ecs_cluster_name             = var.ecs_cluster_name
+  container_insights_value     = var.container_insights_value
+  execute_command_logging       = var.execute_command_logging
+  service_connect_namespace_arn = var.service_connect_namespace_arn
 
   # Security
   ecs_security_group_name        = var.ecs_security_group_name

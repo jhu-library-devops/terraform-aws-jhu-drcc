@@ -42,10 +42,27 @@ variable "ecs_cluster_name" {
   type        = string
 }
 
-variable "enable_container_insights" {
-  description = "Whether to enable CloudWatch Container Insights on the ECS cluster."
-  type        = bool
-  default     = false
+variable "container_insights_value" {
+  description = "Container Insights setting value: disabled, enabled, or enhanced."
+  type        = string
+  default     = "disabled"
+
+  validation {
+    condition     = contains(["disabled", "enabled", "enhanced"], var.container_insights_value)
+    error_message = "container_insights_value must be one of: disabled, enabled, enhanced."
+  }
+}
+
+variable "execute_command_logging" {
+  description = "Logging configuration for ECS Exec. Set to DEFAULT, OVERRIDE, or NONE. Null to omit the block."
+  type        = string
+  default     = null
+}
+
+variable "service_connect_namespace_arn" {
+  description = "ARN of the Cloud Map namespace for Service Connect defaults. Null to omit."
+  type        = string
+  default     = null
 }
 
 # Security

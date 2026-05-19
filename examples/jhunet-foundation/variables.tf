@@ -36,10 +36,22 @@ variable "ecs_cluster_name" {
   type        = string
 }
 
-variable "enable_container_insights" {
-  description = "Whether to enable CloudWatch Container Insights."
-  type        = bool
-  default     = false
+variable "container_insights_value" {
+  description = "Container Insights setting: disabled, enabled, or enhanced."
+  type        = string
+  default     = "disabled"
+}
+
+variable "execute_command_logging" {
+  description = "Logging configuration for ECS Exec."
+  type        = string
+  default     = null
+}
+
+variable "service_connect_namespace_arn" {
+  description = "ARN of the Cloud Map namespace for Service Connect defaults."
+  type        = string
+  default     = null
 }
 
 variable "ecs_security_group_name" {

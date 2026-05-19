@@ -28,7 +28,29 @@ resource "aws_iam_role" "ecs_role" {
   tags = local.tags
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_role_admin" {
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   role       = aws_iam_role.ecs_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+# ECS Exec permissions — allows interactive shell access to running tasks
+resource "aws_iam_role_policy" "ecs_execute_command" {
+  name = "${local.ecs_role_name}-ecs-execute-command"
+  role = aws_iam_role.ecs_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
