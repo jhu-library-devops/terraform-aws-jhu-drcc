@@ -30,7 +30,7 @@ private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
 db_instance_class    = "db.r5.xlarge"        # [REQUIRED] RDS instance type
 db_allocated_storage = 500                   # [REQUIRED] Storage in GB
 db_name              = "dspace"              # [OPTIONAL] Database name (default: "dspace")
-db_username          = "dspaceuser"          # [OPTIONAL] Master username (default: "dspaceuser")
+db_username          = "dspace"              # [OPTIONAL] Master username (default: "dspace")
 db_multi_az          = true                  # [OPTIONAL] Enable Multi-AZ for HA (default: false)
 
 # --- Solr Configuration (REQUIRED) ---

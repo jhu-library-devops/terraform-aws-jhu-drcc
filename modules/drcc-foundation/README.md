@@ -140,7 +140,7 @@ No modules.
 | <a name="input_db_name"></a> [db\_name](#input\_db\_name) | The name of the database to create in the RDS instance. | `string` | `"dspace"` | no |
 | <a name="input_db_secret_rotation_type"></a> [db\_secret\_rotation\_type](#input\_db\_secret\_rotation\_type) | The type of database secret rotation (manual or automatic). | `string` | `"manual"` | no |
 | <a name="input_db_skip_final_snapshot"></a> [db\_skip\_final\_snapshot](#input\_db\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before the DB instance is deleted. Should be false for production. | `bool` | `true` | no |
-| <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The master username for the RDS database. | `string` | `"dspaceuser"` | no |
+| <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The master username for the RDS database. | `string` | `"dspace"` | no |
 | <a name="input_deploy_database"></a> [deploy\_database](#input\_deploy\_database) | If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`. | `bool` | `false` | no |
 | <a name="input_deploy_dspace_config_efs"></a> [deploy\_dspace\_config\_efs](#input\_deploy\_dspace\_config\_efs) | Whether to deploy EFS for DSpace configuration storage. | `bool` | `false` | no |
 | <a name="input_enable_enhanced_monitoring"></a> [enable\_enhanced\_monitoring](#input\_enable\_enhanced\_monitoring) | Whether to enable enhanced monitoring features. | `bool` | `false` | no |

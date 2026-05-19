@@ -130,7 +130,7 @@ No modules.
 | <a name="input_db_secret_arn"></a> [db\_secret\_arn](#input\_db\_secret\_arn) | ARN of the Secrets Manager secret containing database credentials | `string` | `null` | no |
 | <a name="input_db_secret_rotation_type"></a> [db\_secret\_rotation\_type](#input\_db\_secret\_rotation\_type) | The type of database secret rotation (manual or automatic). | `string` | `"manual"` | no |
 | <a name="input_db_skip_final_snapshot"></a> [db\_skip\_final\_snapshot](#input\_db\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before the DB instance is deleted. Should be false for production. | `bool` | `true` | no |
-| <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The master username for the RDS database. | `string` | `"dspaceuser"` | no |
+| <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The master username for the RDS database. | `string` | `"dspace"` | no |
 | <a name="input_deploy_admin_service"></a> [deploy\_admin\_service](#input\_deploy\_admin\_service) | Whether to deploy the admin service | `bool` | `false` | no |
 | <a name="input_deploy_database"></a> [deploy\_database](#input\_deploy\_database) | If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`. | `bool` | `false` | no |
 | <a name="input_dspace_admin_email"></a> [dspace\_admin\_email](#input\_dspace\_admin\_email) | Email address for the initial DSpace administrator account | `string` | `"admin@example.com"` | no |

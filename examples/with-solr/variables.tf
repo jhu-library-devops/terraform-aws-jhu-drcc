@@ -66,7 +66,7 @@ variable "db_name" {
 variable "db_username" {
   description = "Database username"
   type        = string
-  default     = "dspaceuser"
+  default     = "dspace"
 }
 
 variable "solr_node_count" {

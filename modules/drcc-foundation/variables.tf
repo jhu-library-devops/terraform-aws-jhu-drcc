@@ -94,7 +94,7 @@ variable "db_name" {
 variable "db_username" {
   description = "The master username for the RDS database."
   type        = string
-  default     = "dspaceuser"
+  default     = "dspace"
 }
 
 variable "db_multi_az" {
