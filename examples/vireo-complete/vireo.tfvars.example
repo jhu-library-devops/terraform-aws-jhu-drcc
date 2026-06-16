@@ -1,0 +1,56 @@
+# =============================================================================
+# Vireo Complete Example - Variable Values
+# =============================================================================
+# Copy this file to vireo.tfvars and fill in your values.
+# Usage: tofu plan -var-file="vireo.tfvars"
+
+# [REQUIRED] Organization identifier used in resource naming
+organization = "myorg"
+
+# [REQUIRED] Deployment environment (e.g. stage, prod)
+environment = "stage"
+
+# [OPTIONAL] Project name (defaults to "vireo")
+# project_name = "vireo"
+
+# [OPTIONAL] AWS region (defaults to "us-east-1")
+# aws_region = "us-east-1"
+
+# [REQUIRED] VPC CIDR block
+vpc_cidr = "10.0.0.0/16"
+
+# [REQUIRED] Public subnet CIDR blocks (one per availability zone)
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+
+# [REQUIRED] Private subnet CIDR blocks (one per availability zone)
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+
+# [REQUIRED] Public domain name for the Vireo application
+public_domain = "etd.example.edu"
+
+# [REQUIRED] Domain for SES email sending identity
+ses_email_domain = "example.edu"
+
+# [REQUIRED] Private hosted zone name for internal ALB DNS
+internal_hosted_zone_name = "vireo.internal"
+
+# [REQUIRED] ECS task definition family for the proxy service
+proxy_task_family = "myorg-stage-vireo-proxy"
+
+# [REQUIRED] Container name in the proxy task definition
+proxy_container_name = "proxy"
+
+# [REQUIRED] ECS task definition family for the Vireo app service
+app_task_family = "myorg-stage-vireo-app"
+
+# [REQUIRED] Container name in the Vireo app task definition
+app_container_name = "app"
+
+# [REQUIRED] S3 bucket name for Vireo ETL jobs
+vireo_s3_bucket_name = "myorg-stage-vireo-etl"
+
+# [OPTIONAL] Tags applied to all resources
+# tags = {
+#   Team    = "platform"
+#   CostCenter = "12345"
+# }
