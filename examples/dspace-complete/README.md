@@ -1,95 +1,59 @@
 # Complete DSpace Deployment Example
 
-This example demonstrates a complete DSpace deployment using all three modules:
-- `drcc-foundation` - Core infrastructure (VPC, ALB, RDS, IAM)
-- `solr-search-cluster` - Solr search with Zookeeper
-- `dspace-app-services` - DSpace Angular UI, REST API, and background jobs
+This root module composes the three supported DSpace modules:
 
-## Architecture
+- `drcc-foundation` creates networking, ALBs, IAM, WAF, ECS, and service discovery.
+- `dspace-app-services` owns the PostgreSQL database and DSpace application services.
+- `solr-search-cluster` creates Solr, optional Zookeeper, and persistent EFS storage.
 
-![AWS Architecture Diagram](https://lucid.app/publicSegments/view/901491ef-aa95-4759-a4d8-367bfd071b23/image.png)
-
-This configuration deploys:
-- VPC with public and private subnets across 3 availability zones
-- Application Load Balancer (public and private)
-- RDS PostgreSQL database
-- ECS cluster with Fargate tasks
-- Solr cluster (3 nodes) with Zookeeper (3 nodes)
-- DSpace Angular UI and REST API services
-- CloudWatch monitoring and alarms
-- WAF for web application firewall
+The security-group contracts are reciprocal: the public and private ALBs can reach application targets, DSpace can reach RDS and Solr, and Solr can reach Zookeeper, EFS, DNS, and required AWS endpoints.
 
 ## Prerequisites
 
-- AWS CLI configured with appropriate credentials
-- Terraform or OpenTofu >= 1.0
-- Route53 hosted zone for your domain (if using custom domain)
-- SSL certificate in ACM (if using HTTPS)
+- OpenTofu or Terraform `>= 1.6`
+- AWS credentials with permission to create the documented resources
+- A public DNS name
+- Either permission to create and DNS-validate an ACM certificate or an existing ACM certificate ARN
+- Existing SSM parameters when using module-managed DSpace task definitions
+- Unique S3 bucket names and production-approved container image references
 
 ## Usage
 
-1. Copy the example tfvars file:
 ```bash
 cp stage.tfvars.example stage.tfvars
+# Replace example domains, account IDs, images, SSM ARNs, and notification addresses.
+
+tofu init
+tofu plan -var-file=stage.tfvars -out=stage.tfplan
+tofu apply stage.tfplan
 ```
 
-2. Edit `stage.tfvars` with your values:
-   - Update `public_domain` to your actual domain
-   - Adjust CIDR blocks if needed
-   - Configure database and compute resources
+For production, start from `prod.tfvars.example` and review [PRODUCTION.md](./PRODUCTION.md). Apply the reviewed full plan rather than targeting individual modules; targeted applies can leave reciprocal security-group rules or cross-module dependencies incomplete.
 
-3. Initialize Terraform:
-```bash
-terraform init
+## Database ownership
+
+This example sets `deploy_database = true` on `dspace-app-services`. The DSpace module creates RDS, its security group, generated password, and credentials secret. Its database endpoint and secret ARN are passed to Solr. `drcc-foundation` does not create a database.
+
+To use an existing database instead, set `deploy_database = false` in the `dspace_app` module, pass `db_instance_identifier` and `db_credentials_secret_arn_override`, and add the external secret ARN to `foundation.ecs_task_execution_secret_arns` if its name is outside the foundation-managed secret pattern.
+
+## Task-definition modes
+
+The supplied tfvars files use module-managed DSpace task definitions:
+
+```hcl
+use_external_task_definitions = false
 ```
 
-4. Review the plan:
-```bash
-terraform plan -var-file=stage.tfvars
-```
+In this mode, all three DSpace image variables are required. For CI/CD-managed task definitions, set the value to `true` and provide all three task-definition ARNs. Do not mix modes.
 
-5. Apply the configuration:
-```bash
-terraform apply -var-file=stage.tfvars
-```
+## Certificate modes
 
-## Customization
-
-### Using Existing VPC
-Set `create_vpc = false` in the foundation module and provide:
-- `vpc_id`
-- `public_subnet_ids`
-- `private_subnet_ids`
-
-### Using Existing Database
-Set `deploy_database = false` and provide:
-- `db_instance_identifier`
-- `db_credentials_secret_arn_override`
-
-### External Task Definitions
-If you manage ECS task definitions separately (e.g., via CI/CD), uncomment and set:
-- `dspace_angular_task_def_arn`
-- `dspace_api_task_def_arn`
-- `dspace_jobs_task_def_arn`
+The supplied tfvars files require a pre-issued, validated ACM certificate ARN so the documented full-plan workflow can complete in one pass. To set `create_ssl_certificate = true`, use a staged workflow: request the certificate, create the emitted DNS validation records, wait for ACM status `ISSUED`, and then attach it to the listener in a reviewed full plan.
 
 ## Outputs
 
-After deployment, Terraform will output:
-- ALB DNS names
-- Database endpoint
-- ECS cluster information
-- Security group IDs
+The root module returns ALB and ECS identifiers, the managed database endpoint and secret ARN, and the optional initialization Lambda name. The database secret ARN output is marked sensitive.
 
-## Cost Considerations
+## Cost and safety
 
-This example deploys:
-- RDS db.t3.medium instance
-- Multiple Fargate tasks (Solr, Zookeeper, DSpace services)
-- Application Load Balancers
-- NAT Gateways (3 for high availability)
-
-For development/testing, consider:
-- Reducing `solr_node_count` to 1
-- Setting `deploy_zookeeper = false` (use embedded Zookeeper)
-- Using smaller instance types
-- Reducing task counts
+This configuration creates NAT gateways, two ALBs, RDS, EFS, ECS/Fargate services, WAF, and monitoring resources. Review the plan and AWS pricing before applying. Production tfvars enable RDS deletion protection, backups, and a final snapshot; staging intentionally uses less protective defaults and must not be treated as production configuration.

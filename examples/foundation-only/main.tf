@@ -1,5 +1,6 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.6"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -28,13 +29,8 @@ module "foundation" {
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
 
-  # Database Configuration
-  deploy_database      = true
-  db_instance_class    = var.db_instance_class
-  db_allocated_storage = var.db_allocated_storage
-  db_name              = var.db_name
-  db_username          = var.db_username
-  db_multi_az          = false
+  create_ssl_certificate = var.create_ssl_certificate
+  ssl_certificate_arn    = var.ssl_certificate_arn
 }
 
 # Outputs for use by other modules
@@ -52,12 +48,4 @@ output "ecs_security_group_id" {
 
 output "alb_dns_name" {
   value = module.foundation.alb_dns_name
-}
-
-output "db_endpoint" {
-  value = module.foundation.db_instance_endpoint
-}
-
-output "db_credentials_secret_arn" {
-  value = module.foundation.db_credentials_secret_arn
 }

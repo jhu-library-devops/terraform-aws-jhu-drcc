@@ -38,7 +38,7 @@ ecs_task_role_arn                    = module.foundation.ecs_task_role_arn
 public_alb_https_listener_arn         = module.foundation.alb_https_listener_arn
 public_alb_security_group_id          = module.foundation.alb_security_group_id
 public_alb_arn_suffix                 = module.foundation.alb_arn_suffix
-jscholarship_solr_security_group_id   = module.solr.solr_security_group_id
+jscholarship_solr_security_group_id   = module.foundation.private_alb_security_group_id
 jscholarship_api_security_group_id    = module.foundation.private_alb_security_group_id
 alarm_sns_topic_arn                   = module.foundation.sns_topic_arn
 ```

@@ -90,7 +90,7 @@ variable "public_alb_certificate_arn" {
 }
 
 variable "jscholarship_solr_security_group_id" {
-  description = "JScholarship Solr security group ID."
+  description = "Security group ID attached to the configured JScholarship Solr endpoint."
   type        = string
 }
 
