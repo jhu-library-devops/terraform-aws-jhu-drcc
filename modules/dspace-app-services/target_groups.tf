@@ -65,10 +65,11 @@ resource "aws_lb_target_group" "private_api" {
 
 # Listener Rules - Attach target groups to ALB listeners
 
-# Public HTTPS Listener - Default action forwards to UI
+# Public HTTPS listener catch-all. Keep this at the lowest precedence so
+# host-specific application rules, including Repository MCP, are evaluated first.
 resource "aws_lb_listener_rule" "ui_default" {
   listener_arn = var.alb_https_listener_arn
-  priority     = 1
+  priority     = 50000
 
   action {
     type             = "forward"
