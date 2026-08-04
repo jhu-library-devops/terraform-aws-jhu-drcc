@@ -125,7 +125,7 @@ variable "public_alb_certificate_arn" {
 
 # Repository backend network dependencies
 variable "jscholarship_solr_security_group_id" {
-  description = "Security group ID for JScholarship Solr. The module adds reciprocal TCP access on jscholarship_solr_port."
+  description = "Security group ID attached to the endpoint in jscholarship_solr_url. Use the private ALB SG for the module's solr service-discovery name, or the Solr task SG for a direct node URL."
   type        = string
 }
 
@@ -135,7 +135,7 @@ variable "jscholarship_api_security_group_id" {
 }
 
 variable "jhrdr_solr_security_group_id" {
-  description = "Optional JHRDR Solr security group ID. Null disables reciprocal JHRDR Solr rules."
+  description = "Optional security group ID attached to the endpoint in jhrdr_solr_url. Null disables reciprocal JHRDR Solr rules."
   type        = string
   default     = null
 }

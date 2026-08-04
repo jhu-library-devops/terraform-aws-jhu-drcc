@@ -14,7 +14,7 @@ This module deploys the JScholarship/JHRDR Model Context Protocol service on sha
 
 ## Ownership Boundaries
 
-This application module owns its ECS service, optional task definition, log group, target group, listener rule, task security group, backend access rules, autoscaling, and alarms. It intentionally does not create an ECS cluster, ECR repository, IAM roles, ALB, listeners, certificate, WAF, or SNS topic. Those shared resources remain owned by `drcc-foundation` or the deployment composition.
+This application module owns its ECS service, optional task definition, log group, target group, listener rule, task security group, reciprocal public-ALB/backend access rules, autoscaling, and alarms. It intentionally does not create an ECS cluster, ECR repository, IAM roles, ALB, listeners, certificate, WAF, or SNS topic. Those shared resources remain owned by `drcc-foundation` or the deployment composition. Manage each reciprocal rule from one Terraform state only; do not declare equivalent rules around caller-owned SGs elsewhere. Upgrade this module together with a foundation release that removes unrestricted public-ALB egress.
 
 The public ALB can have only one WAF association, so MCP traffic inherits the foundation ACL. For machine-client compatibility, either configure an exact `waf_approved_non_browser_user_agent` or set `waf_block_non_browser_user_agents = false` in `drcc-foundation`; managed rules, application-level host/body validation, and rate limiting still apply. Set `waf_rate_limit_per_ip = 300` if the source stack's global limit is appropriate for all applications sharing the ALB.
 
@@ -24,7 +24,7 @@ The shared listener's default certificate must cover `public_hostname`. If it do
 
 ```hcl
 module "repository_mcp" {
-  source = "github.com/jhu/terraform-aws-jhu-drcc//modules/repository-mcp-service?ref=v2.0.0"
+  source = "github.com/jhu-library-devops/terraform-aws-jhu-drcc//modules/repository-mcp-service?ref=<release-tag>"
 
   organization = "jhu"
   project_name = "repository-mcp"
@@ -45,14 +45,14 @@ module "repository_mcp" {
   # Set only when the listener's default certificate does not cover public_hostname.
   public_alb_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/replace-if-needed"
 
-  jscholarship_solr_security_group_id = module.solr.solr_security_group_id
+  jscholarship_solr_security_group_id = module.foundation.private_alb_security_group_id
   jscholarship_api_security_group_id  = module.foundation.private_alb_security_group_id
 
   mcp_image              = "123456789012.dkr.ecr.us-east-1.amazonaws.com/repository-mcp@sha256:replace-with-digest"
   public_hostname        = "mcp.example.edu"
   listener_rule_priority = 200
 
-  jscholarship_solr_url   = "http://solr.prod.internal.example:8983/solr/search"
+  jscholarship_solr_url   = "http://solr.dspace.prod.local:8983/solr/search"
   jscholarship_api_url    = "http://${module.foundation.private_alb_dns_name}/server/api"
   jscholarship_public_url = "https://jscholarship.example.edu"
 
@@ -123,6 +123,7 @@ No modules.
 | [aws_vpc_security_group_egress_rule.mcp_to_jhrdr_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_egress_rule.mcp_to_jscholarship_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_egress_rule.mcp_to_jscholarship_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.public_alb_to_mcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.jhrdr_api_from_mcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.jhrdr_solr_from_mcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.jscholarship_api_from_mcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
@@ -151,14 +152,14 @@ No modules.
 | <a name="input_jhrdr_api_url"></a> [jhrdr\_api\_url](#input\_jhrdr\_api\_url) | Internal JHRDR API URL. Empty disables the adapter endpoint. | `string` | `""` | no |
 | <a name="input_jhrdr_public_url"></a> [jhrdr\_public\_url](#input\_jhrdr\_public\_url) | Public JHRDR base URL. Empty disables record links for the adapter. | `string` | `""` | no |
 | <a name="input_jhrdr_solr_port"></a> [jhrdr\_solr\_port](#input\_jhrdr\_solr\_port) | JHRDR Solr TCP port. | `number` | `8983` | no |
-| <a name="input_jhrdr_solr_security_group_id"></a> [jhrdr\_solr\_security\_group\_id](#input\_jhrdr\_solr\_security\_group\_id) | Optional JHRDR Solr security group ID. Null disables reciprocal JHRDR Solr rules. | `string` | `null` | no |
+| <a name="input_jhrdr_solr_security_group_id"></a> [jhrdr\_solr\_security\_group\_id](#input\_jhrdr\_solr\_security\_group\_id) | Optional security group ID attached to the endpoint in jhrdr\_solr\_url. Null disables reciprocal JHRDR Solr rules. | `string` | `null` | no |
 | <a name="input_jhrdr_solr_url"></a> [jhrdr\_solr\_url](#input\_jhrdr\_solr\_url) | Internal JHRDR Solr URL. Empty disables the adapter endpoint. | `string` | `""` | no |
 | <a name="input_jscholarship_api_port"></a> [jscholarship\_api\_port](#input\_jscholarship\_api\_port) | JScholarship API endpoint TCP port; use 80 for the foundation private ALB. | `number` | `80` | no |
 | <a name="input_jscholarship_api_security_group_id"></a> [jscholarship\_api\_security\_group\_id](#input\_jscholarship\_api\_security\_group\_id) | Security group ID for the JScholarship API endpoint, normally the DSpace private ALB security group. | `string` | n/a | yes |
 | <a name="input_jscholarship_api_url"></a> [jscholarship\_api\_url](#input\_jscholarship\_api\_url) | Internal JScholarship REST API URL. | `string` | n/a | yes |
 | <a name="input_jscholarship_public_url"></a> [jscholarship\_public\_url](#input\_jscholarship\_public\_url) | Public JScholarship base URL used for record links. | `string` | n/a | yes |
 | <a name="input_jscholarship_solr_port"></a> [jscholarship\_solr\_port](#input\_jscholarship\_solr\_port) | JScholarship Solr TCP port. | `number` | `8983` | no |
-| <a name="input_jscholarship_solr_security_group_id"></a> [jscholarship\_solr\_security\_group\_id](#input\_jscholarship\_solr\_security\_group\_id) | Security group ID for JScholarship Solr. The module adds reciprocal TCP access on jscholarship\_solr\_port. | `string` | n/a | yes |
+| <a name="input_jscholarship_solr_security_group_id"></a> [jscholarship\_solr\_security\_group\_id](#input\_jscholarship\_solr\_security\_group\_id) | Security group ID attached to the endpoint in jscholarship\_solr\_url. Use the private ALB SG for the module's solr service-discovery name, or the Solr task SG for a direct node URL. | `string` | n/a | yes |
 | <a name="input_jscholarship_solr_url"></a> [jscholarship\_solr\_url](#input\_jscholarship\_solr\_url) | Internal JScholarship Solr search collection URL. | `string` | n/a | yes |
 | <a name="input_listener_rule_priority"></a> [listener\_rule\_priority](#input\_listener\_rule\_priority) | Unique priority for the MCP host-based HTTPS listener rule. | `number` | n/a | yes |
 | <a name="input_log_group_name"></a> [log\_group\_name](#input\_log\_group\_name) | Optional CloudWatch log group name override. | `string` | `null` | no |

@@ -19,6 +19,15 @@ resource "aws_vpc_security_group_ingress_rule" "mcp_from_public_alb" {
   ip_protocol                  = "tcp"
 }
 
+resource "aws_vpc_security_group_egress_rule" "public_alb_to_mcp" {
+  security_group_id            = var.public_alb_security_group_id
+  referenced_security_group_id = aws_security_group.mcp.id
+  description                  = "Public ALB traffic to MCP targets"
+  from_port                    = var.container_port
+  to_port                      = var.container_port
+  ip_protocol                  = "tcp"
+}
+
 resource "aws_vpc_security_group_egress_rule" "mcp_to_jscholarship_solr" {
   security_group_id            = aws_security_group.mcp.id
   referenced_security_group_id = var.jscholarship_solr_security_group_id
