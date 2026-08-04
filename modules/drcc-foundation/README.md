@@ -19,20 +19,18 @@ This module provides the foundational AWS infrastructure for DRCC applications, 
 The foundation module creates shared infrastructure that can be used by multiple application modules. It follows AWS best practices for high availability, security, and cost optimization.
 
 <!-- BEGIN_TF_DOCS -->
-
-
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
+| ---- | ------- |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.7.1 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.100.0 |
 
 ## Modules
 
@@ -41,7 +39,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_acm_certificate.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
 | [aws_cloudwatch_dashboard.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_event_rule.alb_cloudmap_sync](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
@@ -119,10 +117,10 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alarm_notification_email"></a> [alarm\_notification\_email](#input\_alarm\_notification\_email) | Email address to receive CloudWatch alarm notifications. | `string` | `null` | no |
 | <a name="input_alb_idle_timeout"></a> [alb\_idle\_timeout](#input\_alb\_idle\_timeout) | The time in seconds that the connection is allowed to be idle. | `number` | `60` | no |
-| <a name="input_alb_ingress_cidr_blocks"></a> [alb\_ingress\_cidr\_blocks](#input\_alb\_ingress\_cidr\_blocks) | List of CIDR blocks allowed to access the ALB. | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_alb_ingress_cidr_blocks"></a> [alb\_ingress\_cidr\_blocks](#input\_alb\_ingress\_cidr\_blocks) | List of CIDR blocks allowed to access the ALB. | `list(string)` | <pre>[<br/>  "0.0.0.0/0"<br/>]</pre> | no |
 | <a name="input_alb_name"></a> [alb\_name](#input\_alb\_name) | The name of the Application Load Balancer. | `string` | `null` | no |
 | <a name="input_app_email_domain"></a> [app\_email\_domain](#input\_app\_email\_domain) | The application email domain for SES configuration. | `string` | `"jscholarship.library.jhu.edu"` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | n/a | yes |
@@ -166,12 +164,15 @@ No modules.
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | The CIDR block for the VPC. Used only when create\_vpc is true. | `string` | `null` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of an existing VPC to use. Required if create\_vpc is false. | `string` | `null` | no |
 | <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | The name of the VPC. | `string` | `null` | no |
+| <a name="input_waf_approved_non_browser_user_agent"></a> [waf\_approved\_non\_browser\_user\_agent](#input\_waf\_approved\_non\_browser\_user\_agent) | Exact non-browser User-Agent value allowed when waf\_block\_non\_browser\_user\_agents is true. | `string` | `"some-approved-user-agent"` | no |
+| <a name="input_waf_block_non_browser_user_agents"></a> [waf\_block\_non\_browser\_user\_agents](#input\_waf\_block\_non\_browser\_user\_agents) | Whether WAF blocks non-browser user agents that do not exactly match waf\_approved\_non\_browser\_user\_agent. Disable only when machine clients such as MCP are protected by other WAF and application controls. | `bool` | `true` | no |
+| <a name="input_waf_rate_limit_per_ip"></a> [waf\_rate\_limit\_per\_ip](#input\_waf\_rate\_limit\_per\_ip) | Maximum requests per five-minute window per source IP before the foundation WAF blocks requests. | `number` | `2000` | no |
 | <a name="input_waf_verified_bots_action"></a> [waf\_verified\_bots\_action](#input\_waf\_verified\_bots\_action) | The action to take for verified bots. | `string` | `"allow"` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_acm_certificate_arn"></a> [acm\_certificate\_arn](#output\_acm\_certificate\_arn) | The ARN of the ACM certificate (created or provided) |
 | <a name="output_acm_certificate_dns_validation_records"></a> [acm\_certificate\_dns\_validation\_records](#output\_acm\_certificate\_dns\_validation\_records) | DNS validation records for the ACM certificate. Create these records in your DNS provider to complete validation. |
 | <a name="output_alb_arn"></a> [alb\_arn](#output\_alb\_arn) | The ARN of the public Application Load Balancer |

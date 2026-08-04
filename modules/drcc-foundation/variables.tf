@@ -193,6 +193,29 @@ variable "waf_verified_bots_action" {
   default     = "allow"
 }
 
+variable "waf_block_non_browser_user_agents" {
+  description = "Whether WAF blocks non-browser user agents that do not exactly match waf_approved_non_browser_user_agent. Disable only when machine clients such as MCP are protected by other WAF and application controls."
+  type        = bool
+  default     = true
+}
+
+variable "waf_approved_non_browser_user_agent" {
+  description = "Exact non-browser User-Agent value allowed when waf_block_non_browser_user_agents is true."
+  type        = string
+  default     = "some-approved-user-agent"
+}
+
+variable "waf_rate_limit_per_ip" {
+  description = "Maximum requests per five-minute window per source IP before the foundation WAF blocks requests."
+  type        = number
+  default     = 2000
+
+  validation {
+    condition     = var.waf_rate_limit_per_ip >= 100
+    error_message = "waf_rate_limit_per_ip must be at least 100."
+  }
+}
+
 variable "deploy_dspace_config_efs" {
   description = "Whether to deploy EFS for DSpace configuration storage."
   type        = bool
