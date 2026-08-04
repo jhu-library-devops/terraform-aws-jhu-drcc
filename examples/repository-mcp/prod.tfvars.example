@@ -1,0 +1,53 @@
+aws_region  = "us-east-1"
+environment = "prod"
+
+# Preserve legacy names while migrating existing resources.
+resource_name_prefix = "jhu-repo-mcp-prod"
+
+vpc_id             = "vpc-0123456789abcdef0"
+vpc_cidr_block     = "10.0.0.0/16"
+private_subnet_ids = ["subnet-0123456789abcdef0", "subnet-0123456789abcdef1", "subnet-0123456789abcdef2"]
+
+# Replace with outputs from drcc-foundation.
+ecs_cluster_id              = "arn:aws:ecs:us-east-1:123456789012:cluster/example-prod"
+ecs_cluster_name            = "example-prod"
+ecs_task_execution_role_arn = "arn:aws:iam::123456789012:role/example-prod-ecs-task-execution"
+ecs_task_role_arn           = "arn:aws:iam::123456789012:role/example-prod-ecs-task"
+public_alb_https_listener_arn = "arn:aws:elasticloadbalancing:us-east-1:123456789012:listener/app/example-prod/0000000000000000/1111111111111111"
+public_alb_security_group_id  = "sg-0123456789abcdef0"
+public_alb_arn_suffix         = "app/example-prod/0000000000000000"
+# Set only when the listener's default certificate does not cover public_hostname.
+public_alb_certificate_arn = null
+
+# Replace with the Solr module output and the foundation private ALB security group output.
+jscholarship_solr_security_group_id = "sg-0123456789abcdef1"
+jscholarship_api_security_group_id  = "sg-0123456789abcdef2"
+
+mcp_image             = "123456789012.dkr.ecr.us-east-1.amazonaws.com/repository-mcp@sha256:replace-with-digest"
+capacity_provider     = "FARGATE"
+task_cpu              = 512
+task_memory           = 1024
+service_desired_count = 2
+service_min_count     = 2
+service_max_count     = 6
+
+public_hostname        = "mcp.library.example.edu"
+listener_rule_priority = 220
+
+jscholarship_solr_url   = "http://solr.prod.internal.example:8983/solr/search"
+jscholarship_api_url    = "http://internal-prod-alb.example/server/api"
+jscholarship_public_url = "https://jscholarship.library.example.edu"
+
+jhrdr_solr_security_group_id = null
+jhrdr_api_security_group_id  = null
+jhrdr_solr_url                = ""
+jhrdr_api_url                 = ""
+jhrdr_public_url              = ""
+
+log_retention_days  = 90
+alarm_sns_topic_arn = "arn:aws:sns:us-east-1:123456789012:repository-prod-alerts"
+
+tags = {
+  Owner  = "repository-team"
+  System = "repository-mcp"
+}
