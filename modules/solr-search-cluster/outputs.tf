@@ -29,6 +29,11 @@ output "solr_security_group_id" {
   value       = aws_security_group.solr_service_sg.id
 }
 
+output "zookeeper_security_group_id" {
+  description = "The ID of the managed Zookeeper service security group, or null when deploy_zookeeper is false"
+  value       = var.deploy_zookeeper ? aws_security_group.zookeeper_service_sg[0].id : null
+}
+
 output "zookeeper_1_service_arn" {
   description = "The ARN of the first Zookeeper ECS service"
   value       = var.deploy_zookeeper && !var.use_external_task_definitions && var.zookeeper_task_count >= 1 ? aws_ecs_service.zookeeper_fargate_service[0].id : null
