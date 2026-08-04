@@ -42,15 +42,7 @@ resource "aws_ecs_task_definition" "dspace_api" {
       var.dspace_ui_url_ssm_arn != null ? [
         { name = "dspace__P__ui__P__url", valueFrom = var.dspace_ui_url_ssm_arn }
       ] : [],
-      var.dspace_db_url_ssm_arn != null ? [
-        { name = "db__P__url", valueFrom = var.dspace_db_url_ssm_arn }
-      ] : [],
-      var.dspace_db_username_ssm_arn != null ? [
-        { name = "db__P__username", valueFrom = var.dspace_db_username_ssm_arn }
-      ] : [],
-      var.dspace_db_password_ssm_arn != null ? [
-        { name = "db__P__password", valueFrom = var.dspace_db_password_ssm_arn }
-      ] : [],
+      local.db_task_secrets,
       var.dspace_solr_url_ssm_arn != null ? [
         { name = "solr__P__server", valueFrom = var.dspace_solr_url_ssm_arn }
       ] : [],
@@ -203,15 +195,7 @@ resource "aws_ecs_task_definition" "dspace_jobs" {
       var.dspace_ui_url_ssm_arn != null ? [
         { name = "dspace__P__ui__P__url", valueFrom = var.dspace_ui_url_ssm_arn }
       ] : [],
-      var.dspace_db_url_ssm_arn != null ? [
-        { name = "db__P__url", valueFrom = var.dspace_db_url_ssm_arn }
-      ] : [],
-      var.dspace_db_username_ssm_arn != null ? [
-        { name = "db__P__username", valueFrom = var.dspace_db_username_ssm_arn }
-      ] : [],
-      var.dspace_db_password_ssm_arn != null ? [
-        { name = "db__P__password", valueFrom = var.dspace_db_password_ssm_arn }
-      ] : [],
+      local.db_task_secrets,
       var.dspace_solr_url_ssm_arn != null ? [
         { name = "solr__P__server", valueFrom = var.dspace_solr_url_ssm_arn }
       ] : [],
