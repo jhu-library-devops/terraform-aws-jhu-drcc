@@ -24,6 +24,11 @@ output "solr_service_name" {
   value       = length(aws_ecs_service.solr_fargate_service) > 0 ? aws_ecs_service.solr_fargate_service[0].name : null
 }
 
+output "solr_security_group_id" {
+  description = "The ID of the Solr service security group for application-to-Solr access rules"
+  value       = aws_security_group.solr_service_sg.id
+}
+
 output "zookeeper_1_service_arn" {
   description = "The ARN of the first Zookeeper ECS service"
   value       = var.deploy_zookeeper && !var.use_external_task_definitions && var.zookeeper_task_count >= 1 ? aws_ecs_service.zookeeper_fargate_service[0].id : null
