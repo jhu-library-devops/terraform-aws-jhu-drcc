@@ -124,25 +124,27 @@ output "ecs_task_role_arn" {
   value       = aws_iam_role.ecs_task_role.arn
 }
 
-# Database Outputs
+# Database Compatibility Outputs
+# Database creation is owned by dspace-app-services. These outputs preserve
+# existing-database lookup compatibility for callers that still consume them.
 output "db_instance_id" {
-  description = "The ID of the RDS instance"
-  value       = module.dspace_app_services.db_instance_id
+  description = "The ID of an existing RDS instance, or null. Database creation is owned by dspace-app-services."
+  value       = try(data.aws_db_instance.existing[0].id, null)
 }
 
 output "db_instance_identifier" {
-  description = "The identifier of the RDS instance"
-  value       = module.dspace_app_services.db_instance_identifier
+  description = "The configured existing RDS instance identifier, or null. Database creation is owned by dspace-app-services."
+  value       = var.db_instance_identifier
 }
 
 output "db_instance_endpoint" {
-  description = "The endpoint of the RDS instance"
-  value       = module.dspace_app_services.db_instance_endpoint
+  description = "The endpoint of an existing RDS instance, or null. Database creation is owned by dspace-app-services."
+  value       = try(data.aws_db_instance.existing[0].endpoint, null)
 }
 
 output "db_credentials_secret_arn" {
-  description = "The ARN of the database credentials secret"
-  value       = module.dspace_app_services.db_credentials_secret_arn
+  description = "The caller-supplied database credentials secret ARN, or null. Database creation is owned by dspace-app-services."
+  value       = var.db_credentials_secret_arn_override
 }
 
 # Route53 Outputs

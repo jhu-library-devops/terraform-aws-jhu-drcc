@@ -1,13 +1,13 @@
 # DRCC Foundation Module
 
-This module provides the foundational AWS infrastructure for DRCC applications, including VPC, load balancers, ECS cluster, RDS database, and supporting services.
+This module provides foundational AWS infrastructure for DRCC applications, including VPC networking, load balancers, an ECS cluster, IAM, WAF, TLS, and service discovery. Database creation is owned by `dspace-app-services`.
 
 ## Features
 
 - VPC with public and private subnets across multiple availability zones
 - Application Load Balancers (public and private)
 - ECS Fargate cluster for containerized applications
-- RDS PostgreSQL database (optional)
+- Database compatibility outputs for a caller-supplied existing RDS instance
 - CloudMap service discovery namespace
 - IAM roles for ECS tasks
 - CloudWatch monitoring and alarms
@@ -18,18 +18,28 @@ This module provides the foundational AWS infrastructure for DRCC applications, 
 
 The foundation module creates shared infrastructure that can be used by multiple application modules. It follows AWS best practices for high availability, security, and cost optimization.
 
+## Network Contract
+
+The public ALB can reach the shared DSpace task security group only on ports 4000 and 8080. The private ALB accepts DSpace task traffic on listener ports 80 and 8983 and can reach DSpace API targets on port 8080. Application modules that attach dedicated task security groups must add reciprocal ALB and backend rules; `solr-search-cluster` and `repository-mcp-service` do this automatically.
+
+Shared DSpace tasks have VPC DNS access plus the ports in `ecs_vpc_tcp_egress_ports` and `ecs_any_ipv4_tcp_egress_ports`. The latter permits the configured ports to any IPv4 destination, including routed private networks. The defaults cover PostgreSQL, HTTPS-based AWS/public APIs, ECS Exec, and standard SMTP submission.
+
+This is a breaking network-policy change. Upgrade foundation, Solr, and Repository MCP in one reviewed plan; applying the new foundation first with an older application module removes ALB egress those older modules rely on. Before upgrading, inventory custom outbound dependencies and add their ports to the appropriate list. Each reciprocal rule on a shared SG must have one Terraform owner—do not duplicate these rules in another module or state. Roll back by pinning all modules to the prior compatible release and restoring the prior SG rules through Terraform.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 | ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 
 ## Providers
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.7.1 |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.8.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 5.100.0 |
 
 ## Modules
@@ -90,18 +100,22 @@ No modules.
 | [aws_subnet.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
-| [aws_vpc_security_group_egress_rule.ecs_service_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.private_alb_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.public_alb_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_any_ipv4_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_private_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_private_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_vpc_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.private_alb_to_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.public_alb_to_angular](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.public_alb_to_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.angular_ecs_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.api_private_alb_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.api_private_alb_from_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.api_private_ecs_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.api_public_ecs_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.http_alb_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.https_alb_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.solr_ecs_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.solr_ecs_self_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.solr_private_alb_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.solr_private_alb_from_ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_wafv2_ip_set.trusted](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_ip_set) | resource |
 | [aws_wafv2_web_acl.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl) | resource |
 | [aws_wafv2_web_acl_association.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafv2_web_acl_association) | resource |
@@ -129,7 +143,7 @@ No modules.
 | <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Controls if a new VPC and networking resources should be created. | `bool` | `true` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage in gigabytes for the RDS database. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The days to retain backups for. Must be > 0 to enable backups. Recommended: 7+ for production. | `number` | `7` | no |
-| <a name="input_db_credentials_secret_arn_override"></a> [db\_credentials\_secret\_arn\_override](#input\_db\_credentials\_secret\_arn\_override) | The ARN of an existing Secrets Manager secret containing database credentials. | `string` | `null` | no |
+| <a name="input_db_credentials_secret_arn_override"></a> [db\_credentials\_secret\_arn\_override](#input\_db\_credentials\_secret\_arn\_override) | The ARN of an existing database credentials secret. Database creation is owned by dspace-app-services. | `string` | `null` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | If the DB instance should have deletion protection enabled. Should be true for production. | `bool` | `false` | no |
 | <a name="input_db_engine_version"></a> [db\_engine\_version](#input\_db\_engine\_version) | The engine version of the RDS instance. | `string` | `"17.4"` | no |
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | The instance class for the RDS database. | `string` | `"db.t3.micro"` | no |
@@ -139,8 +153,11 @@ No modules.
 | <a name="input_db_secret_rotation_type"></a> [db\_secret\_rotation\_type](#input\_db\_secret\_rotation\_type) | The type of database secret rotation (manual or automatic). | `string` | `"manual"` | no |
 | <a name="input_db_skip_final_snapshot"></a> [db\_skip\_final\_snapshot](#input\_db\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before the DB instance is deleted. Should be false for production. | `bool` | `true` | no |
 | <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The master username for the RDS database. | `string` | `"dspace"` | no |
-| <a name="input_deploy_database"></a> [deploy\_database](#input\_deploy\_database) | If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`. | `bool` | `false` | no |
+| <a name="input_deploy_database"></a> [deploy\_database](#input\_deploy\_database) | Deprecated. Database creation is owned by dspace-app-services; this value must remain false. | `bool` | `false` | no |
 | <a name="input_deploy_dspace_config_efs"></a> [deploy\_dspace\_config\_efs](#input\_deploy\_dspace\_config\_efs) | Whether to deploy EFS for DSpace configuration storage. | `bool` | `false` | no |
+| <a name="input_ecs_any_ipv4_tcp_egress_ports"></a> [ecs\_any\_ipv4\_tcp\_egress\_ports](#input\_ecs\_any\_ipv4\_tcp\_egress\_ports) | TCP ports that shared DSpace ECS tasks may reach at any IPv4 destination, including routed private networks. Defaults support HTTPS APIs, image pulls, ECS Exec, and standard SMTP submission; add ports only for documented application dependencies. | `list(number)` | <pre>[<br/>  25,<br/>  443,<br/>  465,<br/>  587<br/>]</pre> | no |
+| <a name="input_ecs_task_execution_secret_arns"></a> [ecs\_task\_execution\_secret\_arns](#input\_ecs\_task\_execution\_secret\_arns) | Additional Secrets Manager ARNs that the shared ECS task execution role may read. Use for externally named database or application secrets. | `list(string)` | `[]` | no |
+| <a name="input_ecs_vpc_tcp_egress_ports"></a> [ecs\_vpc\_tcp\_egress\_ports](#input\_ecs\_vpc\_tcp\_egress\_ports) | TCP ports that shared DSpace ECS tasks may reach anywhere in the VPC CIDR. Keep empty for managed RDS; dspace-app-services creates an SG-specific database rule. Add 5432 only for a documented external PostgreSQL endpoint that cannot be referenced by security group. | `list(number)` | `[]` | no |
 | <a name="input_enable_enhanced_monitoring"></a> [enable\_enhanced\_monitoring](#input\_enable\_enhanced\_monitoring) | Whether to enable enhanced monitoring features. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., dev, staging, prod). | `string` | n/a | yes |
 | <a name="input_health_check_healthy_threshold"></a> [health\_check\_healthy\_threshold](#input\_health\_check\_healthy\_threshold) | The number of consecutive health checks successes required before considering an unhealthy target healthy. | `number` | `2` | no |
@@ -182,10 +199,10 @@ No modules.
 | <a name="output_alb_https_listener_arn"></a> [alb\_https\_listener\_arn](#output\_alb\_https\_listener\_arn) | The ARN of the public ALB HTTPS listener |
 | <a name="output_alb_security_group_id"></a> [alb\_security\_group\_id](#output\_alb\_security\_group\_id) | The ID of the ALB security group |
 | <a name="output_alb_zone_id"></a> [alb\_zone\_id](#output\_alb\_zone\_id) | The zone ID of the public Application Load Balancer |
-| <a name="output_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#output\_db\_credentials\_secret\_arn) | The ARN of the database credentials secret |
-| <a name="output_db_instance_endpoint"></a> [db\_instance\_endpoint](#output\_db\_instance\_endpoint) | The endpoint of the RDS instance |
-| <a name="output_db_instance_id"></a> [db\_instance\_id](#output\_db\_instance\_id) | The ID of the RDS instance |
-| <a name="output_db_instance_identifier"></a> [db\_instance\_identifier](#output\_db\_instance\_identifier) | The identifier of the RDS instance |
+| <a name="output_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#output\_db\_credentials\_secret\_arn) | The caller-supplied database credentials secret ARN, or null. Database creation is owned by dspace-app-services. |
+| <a name="output_db_instance_endpoint"></a> [db\_instance\_endpoint](#output\_db\_instance\_endpoint) | The endpoint of an existing RDS instance, or null. Database creation is owned by dspace-app-services. |
+| <a name="output_db_instance_id"></a> [db\_instance\_id](#output\_db\_instance\_id) | The ID of an existing RDS instance, or null. Database creation is owned by dspace-app-services. |
+| <a name="output_db_instance_identifier"></a> [db\_instance\_identifier](#output\_db\_instance\_identifier) | The configured existing RDS instance identifier, or null. Database creation is owned by dspace-app-services. |
 | <a name="output_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#output\_ecs\_cluster\_arn) | The ARN of the ECS cluster |
 | <a name="output_ecs_cluster_id"></a> [ecs\_cluster\_id](#output\_ecs\_cluster\_id) | The ID of the ECS cluster |
 | <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | The name of the ECS cluster |
@@ -218,15 +235,16 @@ No modules.
 See the [examples](../../examples/) directory for complete usage examples:
 - [Foundation Only](../../examples/foundation-only/) - Deploy just the foundation infrastructure
 - [With Solr](../../examples/with-solr/) - Foundation + Solr search cluster
-- [Complete](../../examples/complete/) - Full DSpace deployment
+- [Complete](../../examples/dspace-complete/) - Full DSpace deployment
 
 ## Notes
 
 - The ECS cluster is created but no services are deployed by this module
 - Application modules should create their own target groups and listener rules
 - The service discovery namespace is shared across all applications
-- Database deployment is optional via the `deploy_database` variable
+- Database creation is not supported by this module. `deploy_database` is retained only to produce migration guidance when an old caller still sets it to `true`.
+- Deprecated database outputs describe only a caller-supplied existing RDS lookup; managed database consumers must use `dspace-app-services` outputs.
 
 ## Production Deployment
 
-For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/dspace-complete/PRODUCTION.md).

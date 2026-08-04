@@ -68,9 +68,14 @@ variable "private_subnet_ids" {
 }
 
 variable "deploy_database" {
-  description = "If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`."
+  description = "Deprecated. Database creation is owned by dspace-app-services; this value must remain false."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.deploy_database
+    error_message = "deploy_database is no longer supported by drcc-foundation. Set it to false and configure database creation in dspace-app-services."
+  }
 }
 
 variable "db_instance_class" {
@@ -134,9 +139,20 @@ variable "db_instance_identifier" {
 }
 
 variable "db_credentials_secret_arn_override" {
-  description = "The ARN of an existing Secrets Manager secret containing database credentials."
+  description = "The ARN of an existing database credentials secret. Database creation is owned by dspace-app-services."
   type        = string
   default     = null
+}
+
+variable "ecs_task_execution_secret_arns" {
+  description = "Additional Secrets Manager ARNs that the shared ECS task execution role may read. Use for externally named database or application secrets."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for arn in var.ecs_task_execution_secret_arns : can(regex("^arn:[^:]+:secretsmanager:[^:]+:[0-9]{12}:secret:", arn))])
+    error_message = "ecs_task_execution_secret_arns must contain valid Secrets Manager ARNs."
+  }
 }
 
 variable "enable_enhanced_monitoring" {
@@ -155,6 +171,28 @@ variable "alb_ingress_cidr_blocks" {
   description = "List of CIDR blocks allowed to access the ALB."
   type        = list(string)
   default     = ["0.0.0.0/0"]
+}
+
+variable "ecs_vpc_tcp_egress_ports" {
+  description = "TCP ports that shared DSpace ECS tasks may reach anywhere in the VPC CIDR. Keep empty for managed RDS; dspace-app-services creates an SG-specific database rule. Add 5432 only for a documented external PostgreSQL endpoint that cannot be referenced by security group."
+  type        = list(number)
+  default     = []
+
+  validation {
+    condition     = alltrue([for port in var.ecs_vpc_tcp_egress_ports : port >= 1 && port <= 65535])
+    error_message = "ecs_vpc_tcp_egress_ports must contain valid TCP ports between 1 and 65535."
+  }
+}
+
+variable "ecs_any_ipv4_tcp_egress_ports" {
+  description = "TCP ports that shared DSpace ECS tasks may reach at any IPv4 destination, including routed private networks. Defaults support HTTPS APIs, image pulls, ECS Exec, and standard SMTP submission; add ports only for documented application dependencies."
+  type        = list(number)
+  default     = [25, 443, 465, 587]
+
+  validation {
+    condition     = alltrue([for port in var.ecs_any_ipv4_tcp_egress_ports : port >= 1 && port <= 65535])
+    error_message = "ecs_any_ipv4_tcp_egress_ports must contain valid TCP ports between 1 and 65535."
+  }
 }
 
 variable "create_ssl_certificate" {
