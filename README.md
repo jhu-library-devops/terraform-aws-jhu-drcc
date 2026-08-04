@@ -10,6 +10,7 @@ Reusable Terraform/OpenTofu modules for deploying containerized applications on 
 | [drcc-foundation](./modules/drcc-foundation/) | VPC, ECS cluster, ALBs, RDS, IAM, WAF, service discovery | None |
 | [solr-search-cluster](./modules/solr-search-cluster/) | Multi-node Solr cluster with Zookeeper on ECS/EFS | drcc-foundation |
 | [dspace-app-services](./modules/dspace-app-services/) | DSpace Angular UI, REST API, background jobs, S3 asset store | drcc-foundation |
+| [repository-mcp-service](./modules/repository-mcp-service/) | Federated JScholarship/JHRDR MCP service on ECS Fargate | drcc-foundation, repository backends |
 
 ## Architecture
 
@@ -17,6 +18,7 @@ Reusable Terraform/OpenTofu modules for deploying containerized applications on 
 graph TB
     subgraph Internet
         Users[Users / Browsers]
+        MCPClients[MCP Clients]
         GH[GitHub Actions CI/CD]
     end
 
@@ -43,12 +45,20 @@ graph TB
             Jobs[Background Jobs]
             S3[(S3 Asset Store)]
         end
+
+        subgraph RepositoryMCP["repository-mcp-service"]
+            MCP[Repository MCP Service]
+        end
     end
 
     Users -->|HTTPS| WAF --> PubALB
+    MCPClients -->|HTTPS /mcp| WAF
     PubALB -->|/| Angular
     PubALB -->|/server| API
+    PubALB -->|MCP hostname| MCP
     PrivALB -->|:8983| SolrNodes
+    MCP -->|Search| SolrNodes
+    MCP -->|Records| PrivALB
     API --> RDS
     API --> SolrNodes
     API --> S3
@@ -58,10 +68,12 @@ graph TB
     Angular --> ECS
     API --> ECS
     SolrNodes --> ECS
+    MCP --> ECS
 
     style Foundation fill:#e1f0ff,stroke:#4a90d9
     style Solr fill:#fff3e0,stroke:#f5a623
     style DSpace fill:#e8f5e9,stroke:#4caf50
+    style RepositoryMCP fill:#f3e5f5,stroke:#8e44ad
 ```
 
 ## Quick Start
@@ -159,6 +171,7 @@ module "dspace_app" {
 |---------|-------------|
 | [dspace-complete](./examples/dspace-complete/) | Full DSpace stack (foundation + Solr + app services) |
 | [foundation-only](./examples/foundation-only/) | Shared infrastructure without application modules |
+| [repository-mcp](./examples/repository-mcp/) | Repository MCP service on existing foundation and repository backends |
 | [with-solr](./examples/with-solr/) | Foundation + Solr cluster without DSpace |
 
 ## Version Pinning
