@@ -48,10 +48,10 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -98,11 +98,13 @@ jobs:
               ;;
           esac
 
-          echo "cluster=${CLUSTER}" >> "$GITHUB_OUTPUT"
-          echo "ecs_service=${ECS_SERVICE}" >> "$GITHUB_OUTPUT"
-          echo "td_family=${TD_FAMILY}" >> "$GITHUB_OUTPUT"
-          echo "container_name=${CONTAINER_NAME}" >> "$GITHUB_OUTPUT"
-          echo "service_type=${SERVICE}" >> "$GITHUB_OUTPUT"
+          {
+            echo "cluster=${CLUSTER}"
+            echo "ecs_service=${ECS_SERVICE}"
+            echo "td_family=${TD_FAMILY}"
+            echo "container_name=${CONTAINER_NAME}"
+            echo "service_type=${SERVICE}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Get current task definition
         id: current-td
@@ -237,13 +239,15 @@ jobs:
 
       - name: Output deployment summary
         run: |
-          echo "### Deployment Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
-          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Environment | \`${{ inputs.environment }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Service | \`${{ inputs.service }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Image | \`${{ inputs.image_uri }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Task Definition | \`${{ steps.register-td.outputs.new_td_arn }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Revision | \`${{ steps.register-td.outputs.new_revision }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Cluster | \`${{ steps.resolve.outputs.cluster }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### Deployment Summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Environment | \`${{ inputs.environment }}\` |"
+            echo "| Service | \`${{ inputs.service }}\` |"
+            echo "| Image | \`${{ inputs.image_uri }}\` |"
+            echo "| Task Definition | \`${{ steps.register-td.outputs.new_td_arn }}\` |"
+            echo "| Revision | \`${{ steps.register-td.outputs.new_revision }}\` |"
+            echo "| Cluster | \`${{ steps.resolve.outputs.cluster }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -59,20 +59,15 @@ resource "aws_security_group" "zookeeper_efs" {
   count = var.deploy_zookeeper ? 1 : 0
 
   name_prefix = "${local.name}-zookeeper-efs-"
+  description = "Zookeeper EFS mount targets"
   vpc_id      = var.vpc_id
 
   ingress {
+    description     = "Zookeeper tasks mounting EFS"
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
     security_groups = [aws_security_group.zookeeper_service_sg[0].id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(local.tags, {
@@ -83,20 +78,15 @@ resource "aws_security_group" "zookeeper_efs" {
 # Security group for Solr EFS access
 resource "aws_security_group" "solr_efs" {
   name_prefix = "${local.name}-solr-efs-"
+  description = "Solr EFS mount targets"
   vpc_id      = var.vpc_id
 
   ingress {
+    description     = "Solr tasks mounting EFS"
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
     security_groups = [aws_security_group.solr_service_sg.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(local.tags, {

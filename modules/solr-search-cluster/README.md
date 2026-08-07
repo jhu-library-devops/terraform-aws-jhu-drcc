@@ -17,20 +17,31 @@ This module deploys a highly available Apache Solr search cluster on ECS Fargate
 
 The Solr cluster uses ECS Fargate for compute, EFS for persistent storage, and CloudMap for service discovery. Each Solr node has a unique DNS name for direct access, and the cluster is accessible via a private Application Load Balancer.
 
+## Network Contract
+
+The module adds reciprocal port 8983 rules between Solr and the foundation DSpace task/private-ALB security groups passed as inputs. Managed Zookeeper permits only Solr client traffic on 2181, ensemble peer traffic on 2888/3888, EFS on 2049, VPC DNS, and HTTPS-based AWS APIs. EFS mount-target security groups do not allow outbound traffic.
+
+When `deploy_zookeeper = false`, port 2181 egress defaults to the selected VPC CIDR. Set `external_zookeeper_cidr_blocks` for an ensemble in a peered network or another approved range, and configure that ensemble's ingress independently. The module exports both Solr and managed Zookeeper security-group IDs for compositions that need additional explicit clients.
+
+The module creates reciprocal rules on the foundation ECS and private-ALB security groups supplied as inputs. Manage each rule from one Terraform state only; do not independently declare equivalent rules. Upgrade this module together with the foundation version that removes unrestricted ALB/task egress, and inspect the saved plan for replacement of legacy broad rules before applying.
+
 <!-- BEGIN_TF_DOCS -->
-
-
 ## Requirements
 
-No requirements.
+| Name | Version |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | n/a |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| ---- | ------- |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.8.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.100.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 ## Modules
 
@@ -39,7 +50,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_dashboard.solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_dashboard.solr_monitoring](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_log_group.solr_fargate](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
@@ -96,18 +107,31 @@ No modules.
 | [aws_ssm_parameter.solr-url](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.ui-url](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_synthetics_canary.solr_health](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/synthetics_canary) | resource |
+| [aws_vpc_security_group_egress_rule.canary_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.canary_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.canary_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.canary_to_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.ecs_to_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.private_alb_to_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_egress_rule.solr_alb_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.solr_dns_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.solr_https_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.solr_nfs_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_nfs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_egress_rule.solr_self_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.solr_zookeeper_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
-| [aws_vpc_security_group_egress_rule.zk_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_zookeeper_external_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.solr_zookeeper_internal_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_dns_tcp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_dns_udp](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_election_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_follower_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_egress_rule.zk_nfs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
+| [aws_vpc_security_group_ingress_rule.private_alb_from_solr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_http_alb_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_http_canary_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_http_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.solr_http_self_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
-| [aws_vpc_security_group_ingress_rule.zk_client_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.zk_client_solr_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.zk_election_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.zk_follower_ingress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
@@ -119,11 +143,12 @@ No modules.
 | [aws_network_interfaces.private_alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/network_interfaces) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_secretsmanager_secret.existing_zk](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/secretsmanager_secret) | data source |
+| [aws_vpc.selected](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alarm_notification_email"></a> [alarm\_notification\_email](#input\_alarm\_notification\_email) | Email address to receive CloudWatch alarm notifications. | `string` | `null` | no |
 | <a name="input_alarms_sns_topic_arn"></a> [alarms\_sns\_topic\_arn](#input\_alarms\_sns\_topic\_arn) | SNS topic ARN for CloudWatch alarms | `string` | `""` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region to deploy resources in. | `string` | n/a | yes |
@@ -132,7 +157,7 @@ No modules.
 | <a name="input_db_secret_arn"></a> [db\_secret\_arn](#input\_db\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the database credentials. | `string` | n/a | yes |
 | <a name="input_deploy_zookeeper"></a> [deploy\_zookeeper](#input\_deploy\_zookeeper) | Whether to deploy a Zookeeper service. | `bool` | `false` | no |
 | <a name="input_desired_task_count"></a> [desired\_task\_count](#input\_desired\_task\_count) | The desired number of tasks to run in the ECS service. | `number` | `1` | no |
-| <a name="input_ecr_repositories"></a> [ecr\_repositories](#input\_ecr\_repositories) | A list of ECR repository names to create. | `list(string)` | <pre>[<br>  "solr"<br>]</pre> | no |
+| <a name="input_ecr_repositories"></a> [ecr\_repositories](#input\_ecr\_repositories) | A list of ECR repository names to create. | `list(string)` | <pre>[<br/>  "solr"<br/>]</pre> | no |
 | <a name="input_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#input\_ecs\_cluster\_arn) | The ARN of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_cluster_id"></a> [ecs\_cluster\_id](#input\_ecs\_cluster\_id) | The ID of the ECS cluster (from foundation module). | `string` | n/a | yes |
 | <a name="input_ecs_cluster_name"></a> [ecs\_cluster\_name](#input\_ecs\_cluster\_name) | The name of the ECS cluster (from foundation module). | `string` | n/a | yes |
@@ -143,6 +168,7 @@ No modules.
 | <a name="input_enable_event_capture"></a> [enable\_event\_capture](#input\_enable\_event\_capture) | Whether to enable ECS event capture for enhanced monitoring. | `bool` | `false` | no |
 | <a name="input_enable_solr_autoscaling"></a> [enable\_solr\_autoscaling](#input\_enable\_solr\_autoscaling) | Enable Solr auto-scaling policies and collection templates | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The deployment environment (e.g., dev, staging, prod). | `string` | n/a | yes |
+| <a name="input_external_zookeeper_cidr_blocks"></a> [external\_zookeeper\_cidr\_blocks](#input\_external\_zookeeper\_cidr\_blocks) | CIDR blocks containing an externally managed Zookeeper ensemble when deploy\_zookeeper is false. Defaults to the selected VPC CIDR when empty. | `list(string)` | `[]` | no |
 | <a name="input_max_task_count"></a> [max\_task\_count](#input\_max\_task\_count) | The maximum number of tasks for auto scaling. | `number` | `4` | no |
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name (e.g., jhu). | `string` | `"jhu"` | no |
 | <a name="input_private_alb_name"></a> [private\_alb\_name](#input\_private\_alb\_name) | The name of the private ALB (for network interface discovery). | `string` | n/a | yes |
@@ -154,8 +180,8 @@ No modules.
 | <a name="input_service_discovery_namespace_id"></a> [service\_discovery\_namespace\_id](#input\_service\_discovery\_namespace\_id) | The ID of the CloudMap service discovery namespace. | `string` | n/a | yes |
 | <a name="input_service_discovery_namespace_name"></a> [service\_discovery\_namespace\_name](#input\_service\_discovery\_namespace\_name) | The name of the CloudMap service discovery namespace. | `string` | n/a | yes |
 | <a name="input_sns_topic_arn"></a> [sns\_topic\_arn](#input\_sns\_topic\_arn) | The ARN of the SNS topic for alarms (from DRCC foundation module). | `string` | `null` | no |
-| <a name="input_solr_cluster_policies"></a> [solr\_cluster\_policies](#input\_solr\_cluster\_policies) | Solr cluster auto-scaling policies | <pre>list(object({<br>    replica    = optional(string)<br>    shard      = optional(string)<br>    collection = optional(string)<br>    cores      = optional(string)<br>    node       = optional(string)<br>    strict     = optional(bool)<br>  }))</pre> | <pre>[<br>  {<br>    "collection": "#ANY",<br>    "replica": "1",<br>    "shard": "#EACH",<br>    "strict": false<br>  },<br>  {<br>    "cores": "<5",<br>    "node": "#ANY"<br>  }<br>]</pre> | no |
-| <a name="input_solr_collection_templates"></a> [solr\_collection\_templates](#input\_solr\_collection\_templates) | Solr collection templates with auto-recovery settings | <pre>map(object({<br>    numShards         = optional(number)<br>    replicationFactor = optional(number)<br>    autoAddReplicas   = optional(bool)<br>    maxShardsPerNode  = optional(number)<br>  }))</pre> | <pre>{<br>  "dspace_default": {<br>    "autoAddReplicas": true,<br>    "maxShardsPerNode": 2,<br>    "numShards": 1,<br>    "replicationFactor": 3<br>  }<br>}</pre> | no |
+| <a name="input_solr_cluster_policies"></a> [solr\_cluster\_policies](#input\_solr\_cluster\_policies) | Solr cluster auto-scaling policies | <pre>list(object({<br/>    replica    = optional(string)<br/>    shard      = optional(string)<br/>    collection = optional(string)<br/>    cores      = optional(string)<br/>    node       = optional(string)<br/>    strict     = optional(bool)<br/>  }))</pre> | <pre>[<br/>  {<br/>    "collection": "#ANY",<br/>    "replica": "1",<br/>    "shard": "#EACH",<br/>    "strict": false<br/>  },<br/>  {<br/>    "cores": "<5",<br/>    "node": "#ANY"<br/>  }<br/>]</pre> | no |
+| <a name="input_solr_collection_templates"></a> [solr\_collection\_templates](#input\_solr\_collection\_templates) | Solr collection templates with auto-recovery settings | <pre>map(object({<br/>    numShards         = optional(number)<br/>    replicationFactor = optional(number)<br/>    autoAddReplicas   = optional(bool)<br/>    maxShardsPerNode  = optional(number)<br/>  }))</pre> | <pre>{<br/>  "dspace_default": {<br/>    "autoAddReplicas": true,<br/>    "maxShardsPerNode": 2,<br/>    "numShards": 1,<br/>    "replicationFactor": 3<br/>  }<br/>}</pre> | no |
 | <a name="input_solr_cpu"></a> [solr\_cpu](#input\_solr\_cpu) | The CPU units for the Solr task. | `number` | `2048` | no |
 | <a name="input_solr_image_name"></a> [solr\_image\_name](#input\_solr\_image\_name) | The name of the Solr Docker image to use. | `string` | `"solr"` | no |
 | <a name="input_solr_image_override"></a> [solr\_image\_override](#input\_solr\_image\_override) | Override the default Solr image with a custom image URI. | `string` | `null` | no |
@@ -168,6 +194,7 @@ No modules.
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The ID of the VPC to deploy resources in. | `string` | n/a | yes |
 | <a name="input_zk_host_secret_arn"></a> [zk\_host\_secret\_arn](#input\_zk\_host\_secret\_arn) | The ARN of the AWS Secrets Manager secret containing the Zookeeper host information. | `string` | `null` | no |
 | <a name="input_zookeeper_cpu"></a> [zookeeper\_cpu](#input\_zookeeper\_cpu) | The CPU units for the Zookeeper task. | `number` | `512` | no |
+| <a name="input_zookeeper_image"></a> [zookeeper\_image](#input\_zookeeper\_image) | Override the default Zookeeper image with a complete container image URI. | `string` | `null` | no |
 | <a name="input_zookeeper_memory"></a> [zookeeper\_memory](#input\_zookeeper\_memory) | The memory (in MiB) for the Zookeeper task. | `number` | `1024` | no |
 | <a name="input_zookeeper_task_count"></a> [zookeeper\_task\_count](#input\_zookeeper\_task\_count) | The number of Zookeeper tasks to run. Should be odd number (3 or 5) for proper quorum. | `number` | `3` | no |
 | <a name="input_zookeeper_task_def_arns"></a> [zookeeper\_task\_def\_arns](#input\_zookeeper\_task\_def\_arns) | List of external task definition ARNs for Zookeeper nodes (required when use\_external\_task\_definitions = true and deploy\_zookeeper = true). | `list(string)` | `[]` | no |
@@ -175,7 +202,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cloudwatch_dashboard_name"></a> [cloudwatch\_dashboard\_name](#output\_cloudwatch\_dashboard\_name) | The name of the CloudWatch dashboard |
 | <a name="output_cloudwatch_dashboard_url"></a> [cloudwatch\_dashboard\_url](#output\_cloudwatch\_dashboard\_url) | The URL of the CloudWatch dashboard |
 | <a name="output_ecr_repository_urls"></a> [ecr\_repository\_urls](#output\_ecr\_repository\_urls) | A map of ECR repository names to their URLs |
@@ -188,6 +215,7 @@ No modules.
 | <a name="output_solr_efs_id"></a> [solr\_efs\_id](#output\_solr\_efs\_id) | The ID of the Solr data EFS file system (alias) |
 | <a name="output_solr_node_efs_access_point_ids"></a> [solr\_node\_efs\_access\_point\_ids](#output\_solr\_node\_efs\_access\_point\_ids) | The IDs of the individual Solr node EFS access points |
 | <a name="output_solr_node_efs_access_points"></a> [solr\_node\_efs\_access\_points](#output\_solr\_node\_efs\_access\_points) | Map of Solr node names to their EFS access point IDs and paths |
+| <a name="output_solr_security_group_id"></a> [solr\_security\_group\_id](#output\_solr\_security\_group\_id) | The ID of the Solr service security group for application-to-Solr access rules |
 | <a name="output_solr_service_arn"></a> [solr\_service\_arn](#output\_solr\_service\_arn) | The ARN of the first Solr ECS service |
 | <a name="output_solr_service_arns"></a> [solr\_service\_arns](#output\_solr\_service\_arns) | The ARNs of the Solr ECS services |
 | <a name="output_solr_service_name"></a> [solr\_service\_name](#output\_solr\_service\_name) | The name of the first Solr ECS service |
@@ -204,6 +232,7 @@ No modules.
 | <a name="output_zookeeper_data_efs_access_point_id"></a> [zookeeper\_data\_efs\_access\_point\_id](#output\_zookeeper\_data\_efs\_access\_point\_id) | The ID of the Zookeeper data EFS access point |
 | <a name="output_zookeeper_data_efs_id"></a> [zookeeper\_data\_efs\_id](#output\_zookeeper\_data\_efs\_id) | The ID of the Zookeeper data EFS file system |
 | <a name="output_zookeeper_secret_arn"></a> [zookeeper\_secret\_arn](#output\_zookeeper\_secret\_arn) | The ARN of the Secrets Manager secret for the Zookeeper host |
+| <a name="output_zookeeper_security_group_id"></a> [zookeeper\_security\_group\_id](#output\_zookeeper\_security\_group\_id) | The ID of the managed Zookeeper service security group, or null when deploy\_zookeeper is false |
 | <a name="output_zookeeper_service_arn"></a> [zookeeper\_service\_arn](#output\_zookeeper\_service\_arn) | The ARN of the Zookeeper ECS service |
 | <a name="output_zookeeper_service_name"></a> [zookeeper\_service\_name](#output\_zookeeper\_service\_name) | The name of the Zookeeper ECS service |
 | <a name="output_zookeeper_task_definition_arns"></a> [zookeeper\_task\_definition\_arns](#output\_zookeeper\_task\_definition\_arns) | List of ARNs for Zookeeper node task definitions (Terraform-managed or external) |
@@ -214,7 +243,7 @@ No modules.
 
 See the [examples](../../examples/) directory for complete usage examples:
 - [With Solr](../../examples/with-solr/) - Foundation + Solr cluster
-- [Complete](../../examples/complete/) - Full DSpace deployment with Solr
+- [Complete](../../examples/dspace-complete/) - Full DSpace deployment with Solr
 
 ## Task Definition Management
 
@@ -437,4 +466,4 @@ solr_memory                   = 16384
 
 ## Production Deployment
 
-For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/dspace-complete/PRODUCTION.md).

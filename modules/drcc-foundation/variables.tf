@@ -68,9 +68,14 @@ variable "private_subnet_ids" {
 }
 
 variable "deploy_database" {
-  description = "If true, deploys a new RDS PostgreSQL database. If false, the module can use an existing database by providing `db_instance_identifier` and `db_credentials_secret_arn_override`."
+  description = "Deprecated. Database creation is owned by dspace-app-services; this value must remain false."
   type        = bool
   default     = false
+
+  validation {
+    condition     = !var.deploy_database
+    error_message = "deploy_database is no longer supported by drcc-foundation. Set it to false and configure database creation in dspace-app-services."
+  }
 }
 
 variable "db_instance_class" {
@@ -134,9 +139,20 @@ variable "db_instance_identifier" {
 }
 
 variable "db_credentials_secret_arn_override" {
-  description = "The ARN of an existing Secrets Manager secret containing database credentials."
+  description = "The ARN of an existing database credentials secret. Database creation is owned by dspace-app-services."
   type        = string
   default     = null
+}
+
+variable "ecs_task_execution_secret_arns" {
+  description = "Additional Secrets Manager ARNs that the shared ECS task execution role may read. Use for externally named database or application secrets."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for arn in var.ecs_task_execution_secret_arns : can(regex("^arn:[^:]+:secretsmanager:[^:]+:[0-9]{12}:secret:", arn))])
+    error_message = "ecs_task_execution_secret_arns must contain valid Secrets Manager ARNs."
+  }
 }
 
 variable "enable_enhanced_monitoring" {
@@ -155,6 +171,28 @@ variable "alb_ingress_cidr_blocks" {
   description = "List of CIDR blocks allowed to access the ALB."
   type        = list(string)
   default     = ["0.0.0.0/0"]
+}
+
+variable "ecs_vpc_tcp_egress_ports" {
+  description = "TCP ports that shared DSpace ECS tasks may reach anywhere in the VPC CIDR. Keep empty for managed RDS; dspace-app-services creates an SG-specific database rule. Add 5432 only for a documented external PostgreSQL endpoint that cannot be referenced by security group."
+  type        = list(number)
+  default     = []
+
+  validation {
+    condition     = alltrue([for port in var.ecs_vpc_tcp_egress_ports : port >= 1 && port <= 65535])
+    error_message = "ecs_vpc_tcp_egress_ports must contain valid TCP ports between 1 and 65535."
+  }
+}
+
+variable "ecs_any_ipv4_tcp_egress_ports" {
+  description = "TCP ports that shared DSpace ECS tasks may reach at any IPv4 destination, including routed private networks. Defaults support HTTPS APIs, image pulls, ECS Exec, and standard SMTP submission; add ports only for documented application dependencies."
+  type        = list(number)
+  default     = [25, 443, 465, 587]
+
+  validation {
+    condition     = alltrue([for port in var.ecs_any_ipv4_tcp_egress_ports : port >= 1 && port <= 65535])
+    error_message = "ecs_any_ipv4_tcp_egress_ports must contain valid TCP ports between 1 and 65535."
+  }
 }
 
 variable "create_ssl_certificate" {
@@ -191,6 +229,29 @@ variable "waf_verified_bots_action" {
   description = "The action to take for verified bots."
   type        = string
   default     = "allow"
+}
+
+variable "waf_block_non_browser_user_agents" {
+  description = "Whether WAF blocks non-browser user agents that do not exactly match waf_approved_non_browser_user_agent. Disable only when machine clients such as MCP are protected by other WAF and application controls."
+  type        = bool
+  default     = true
+}
+
+variable "waf_approved_non_browser_user_agent" {
+  description = "Exact non-browser User-Agent value allowed when waf_block_non_browser_user_agents is true."
+  type        = string
+  default     = "some-approved-user-agent"
+}
+
+variable "waf_rate_limit_per_ip" {
+  description = "Maximum requests per five-minute window per source IP before the foundation WAF blocks requests."
+  type        = number
+  default     = 2000
+
+  validation {
+    condition     = var.waf_rate_limit_per_ip >= 100
+    error_message = "waf_rate_limit_per_ip must be at least 100."
+  }
 }
 
 variable "deploy_dspace_config_efs" {

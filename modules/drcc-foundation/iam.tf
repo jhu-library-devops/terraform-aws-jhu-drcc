@@ -35,10 +35,13 @@ resource "aws_iam_role_policy" "ecs_secrets_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = [
-          "${local.db_secret_arn_final}",
-          "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/${var.environment}/zookeeper-host-*"
-        ]
+        Resource = concat(
+          [
+            "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/${var.environment}/rds-credentials-*",
+            "arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}/${var.environment}/zookeeper-host-*"
+          ],
+          var.ecs_task_execution_secret_arns
+        )
       }
     ]
   })

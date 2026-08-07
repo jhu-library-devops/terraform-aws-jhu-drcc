@@ -30,11 +30,11 @@ module "dspace_app" {
   
   # ... other configuration ...
   
-  # Enable initialization
-  enable_init_tasks = true
-  db_secret_arn     = module.foundation.db_credentials_secret_arn
-  solr_url          = "http://${module.foundation.private_alb_dns_name}:8983/solr"
-  dspace_api_image  = "dspace/dspace:7.6"
+  # Initialization uses the DSpace-managed database secret automatically.
+  enable_init_tasks                 = true
+  dspace_admin_password_secret_arn = var.dspace_admin_password_secret_arn
+  solr_url                          = "http://${module.foundation.private_alb_dns_name}:8983/solr"
+  dspace_api_image                  = "dspace/dspace:7.6"
 }
 ```
 
@@ -89,12 +89,9 @@ terraform apply -var-file=prod.tfvars
 
 ## What Gets Initialized
 
-### Database Initialization
-- Runs `dspace database migrate` to create/update schema
-- Creates initial admin user with credentials:
-  - Email: `admin@example.com`
-  - Password: `admin`
-  - **⚠️ Change these immediately after first login!**
+### Administrator credentials
+
+Store a randomly generated administrator password of at least 12 characters as a plaintext Secrets Manager secret, grant the foundation ECS execution role access to its ARN, and pass that ARN through `dspace_admin_password_secret_arn`. Do not place the password in Terraform configuration, tfvars, commands, or logs.
 
 ### Solr Initialization
 - Runs `dspace solr-import-collections`
@@ -104,18 +101,18 @@ terraform apply -var-file=prod.tfvars
 
 ## Customization
 
-### Custom Admin User
+### Custom administrator
 
-To customize the admin user, modify the initialization task definition:
+Set the root-module inputs instead of editing module source:
 
 ```hcl
-# In initialization.tf
-command = [
-  "/bin/bash",
-  "-c",
-  "dspace database migrate && dspace create-administrator -e your-email@example.com -f FirstName -l LastName -p YourPassword -c en"
-]
+dspace_admin_email               = "repository-admin@example.edu"
+dspace_admin_first_name          = "Repository"
+dspace_admin_last_name           = "Administrator"
+dspace_admin_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:dspace/prod/admin-password-example"
 ```
+
+The secret value must be the password string itself, not a JSON object.
 
 ### Additional Initialization Steps
 
@@ -156,11 +153,12 @@ Verify:
 - Security group allows traffic on port 5432
 - Database credentials in Secrets Manager are correct
 
+Confirm the secret exists without printing its value:
+
 ```bash
-aws secretsmanager get-secret-value \
+aws secretsmanager describe-secret \
   --secret-id <secret-arn> \
-  --query SecretString \
-  --output text | jq
+  --query '{ARN:ARN,Name:Name,LastChangedDate:LastChangedDate}'
 ```
 
 ### Solr Connection Errors
@@ -208,7 +206,7 @@ aws ecs run-task \
 
 ## Security Considerations
 
-1. **Change Default Admin Password**: The default admin credentials should be changed immediately
+1. **Protect administrator credentials**: inject the password from Secrets Manager and rotate it after first use
 2. **Disable After Use**: Set `enable_init_tasks = false` after initialization
 3. **Restrict Lambda Execution**: Use IAM policies to control who can invoke the Lambda function
 4. **Audit Logs**: Review CloudWatch Logs for initialization activities

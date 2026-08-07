@@ -92,6 +92,17 @@ variable "zk_host_secret_arn" {
   default     = null
 }
 
+variable "external_zookeeper_cidr_blocks" {
+  description = "CIDR blocks containing an externally managed Zookeeper ensemble when deploy_zookeeper is false. Defaults to the selected VPC CIDR when empty."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.external_zookeeper_cidr_blocks : can(cidrnetmask(cidr))])
+    error_message = "external_zookeeper_cidr_blocks must contain valid IPv4 CIDR blocks."
+  }
+}
+
 variable "db_secret_arn" {
   description = "The ARN of the AWS Secrets Manager secret containing the database credentials."
   type        = string
@@ -143,6 +154,12 @@ variable "solr_image_tag" {
   description = "The tag of the Solr Docker image to use."
   type        = string
   default     = "latest"
+}
+
+variable "zookeeper_image" {
+  description = "Override the default Zookeeper image with a complete container image URI."
+  type        = string
+  default     = null
 }
 
 variable "solr_cpu" {

@@ -15,7 +15,9 @@ organization  = "jhu"                        # [REQUIRED] Your institution's sho
 project_name  = "dspace"                     # [OPTIONAL] Project identifier (default: "dspace")
 environment   = "prod"                       # [REQUIRED] Environment name (e.g., prod, stage, dev)
 aws_region    = "us-east-1"                  # [OPTIONAL] AWS region (default: "us-east-1")
-public_domain = "dspace.library.jhu.edu"     # [REQUIRED] Public domain for the DSpace application
+public_domain         = "dspace.library.jhu.edu" # [REQUIRED] Public domain for the DSpace application
+create_ssl_certificate = false # [REQUIRED] Reuse a validated ACM certificate for a one-pass deployment
+ssl_certificate_arn     = "arn:aws:acm:us-east-1:123456789012:certificate/replace-me"
 
 # --- VPC Configuration (REQUIRED) ---
 # Plan CIDR blocks to avoid conflicts with existing networks or VPN ranges.
@@ -31,7 +33,10 @@ db_instance_class    = "db.r5.xlarge"        # [REQUIRED] RDS instance type
 db_allocated_storage = 500                   # [REQUIRED] Storage in GB
 db_name              = "dspace"              # [OPTIONAL] Database name (default: "dspace")
 db_username          = "dspace"              # [OPTIONAL] Master username (default: "dspace")
-db_multi_az          = true                  # [OPTIONAL] Enable Multi-AZ for HA (default: false)
+db_multi_az                = true            # [OPTIONAL] Enable Multi-AZ for HA
+ db_backup_retention_period = 30              # [OPTIONAL] Retain automated backups for 30 days
+ db_deletion_protection     = true            # [OPTIONAL] Protect the production database from deletion
+ db_skip_final_snapshot     = false           # [OPTIONAL] Create a final snapshot on deletion
 
 # --- Solr Configuration (REQUIRED) ---
 # Sizing guide:
@@ -42,8 +47,6 @@ db_multi_az          = true                  # [OPTIONAL] Enable Multi-AZ for HA
 solr_node_count      = 5                     # [REQUIRED] Number of Solr nodes (use odd numbers)
 deploy_zookeeper     = true                  # [REQUIRED] Deploy Zookeeper ensemble
 zookeeper_task_count = 3                     # [REQUIRED] Zookeeper nodes (3 or 5 for quorum)
-solr_cpu             = "4096"                # [REQUIRED] CPU units per Solr task (1024 = 1 vCPU)
-solr_memory          = "8192"                # [REQUIRED] Memory in MiB per Solr task
 
 # --- DSpace Application Configuration (REQUIRED) ---
 # Minimum 2 tasks per service recommended for production high availability.
@@ -91,9 +94,6 @@ solr_memory          = 16384                 # [OPTIONAL] Solr memory per node (
 dspace_server_url_ssm_arn     = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/server/url"
 dspace_server_ssr_url_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/server/ssr-url"
 dspace_ui_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/ui/url"
-dspace_db_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/url"
-dspace_db_username_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/username"
-dspace_db_password_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/db/password"
 dspace_solr_url_ssm_arn       = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/prod/solr/url"
 
 # Mail server configuration
@@ -128,7 +128,12 @@ dspace_jobs_log_group_name    = "/ecs/jhu-prod-dspace-jobs"
 # --- Initialization (OPTIONAL) ---
 # Set enable_init_tasks to true on first deployment to run database migration and Solr setup.
 # After initialization completes, set back to false.
-enable_init_tasks = false                    # [OPTIONAL] Enable init Lambda (default: false)
+# Set these before enabling initialization:
+# dspace_admin_email               = "repository-admin@example.edu"
+# dspace_admin_first_name          = "Repository"
+# dspace_admin_last_name           = "Administrator"
+# dspace_admin_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:dspace/prod/admin-password-example"
+enable_init_tasks = false # [OPTIONAL] Enable init Lambda (default: false)
 
 # --- External Task Definitions (OPTIONAL) ---
 # Only needed when use_external_task_definitions = true.
