@@ -56,6 +56,12 @@ variable "ecs_cluster_id" {
   type        = string
 }
 
+variable "deploy_ecs_services" {
+  description = "Whether to create the ECS services. Set to false for initial infrastructure provisioning before task definitions are registered."
+  type        = bool
+  default     = true
+}
+
 # -----------------------------------------------------------------------------
 # Domain
 # -----------------------------------------------------------------------------
@@ -80,23 +86,27 @@ variable "internal_hosted_zone_name" {
 # -----------------------------------------------------------------------------
 
 variable "proxy_task_family" {
-  description = "The ECS task definition family name for the proxy (externally managed)."
+  description = "The ECS task definition family name for the proxy (externally managed). Required when deploy_ecs_services is true."
   type        = string
+  default     = null
 }
 
 variable "proxy_container_name" {
-  description = "The container name in the proxy task definition."
+  description = "The container name in the proxy task definition. Required when deploy_ecs_services is true."
   type        = string
+  default     = null
 }
 
 variable "app_task_family" {
-  description = "The ECS task definition family name for the Vireo app (externally managed)."
+  description = "The ECS task definition family name for the Vireo app (externally managed). Required when deploy_ecs_services is true."
   type        = string
+  default     = null
 }
 
 variable "app_container_name" {
-  description = "The container name in the Vireo app task definition."
+  description = "The container name in the Vireo app task definition. Required when deploy_ecs_services is true."
   type        = string
+  default     = null
 }
 
 # -----------------------------------------------------------------------------

@@ -106,23 +106,23 @@ output "app_security_group_id" {
 # -----------------------------------------------------------------------------
 
 output "proxy_service_arn" {
-  description = "The ARN of the proxy ECS service"
-  value       = aws_ecs_service.proxy.id
+  description = "The ARN of the proxy ECS service (null when deploy_ecs_services is false)"
+  value       = var.deploy_ecs_services ? aws_ecs_service.proxy[0].id : null
 }
 
 output "proxy_service_name" {
-  description = "The name of the proxy ECS service"
-  value       = aws_ecs_service.proxy.name
+  description = "The name of the proxy ECS service (null when deploy_ecs_services is false)"
+  value       = var.deploy_ecs_services ? aws_ecs_service.proxy[0].name : null
 }
 
 output "app_service_arn" {
-  description = "The ARN of the app ECS service"
-  value       = aws_ecs_service.app.id
+  description = "The ARN of the app ECS service (null when deploy_ecs_services is false)"
+  value       = var.deploy_ecs_services ? aws_ecs_service.app[0].id : null
 }
 
 output "app_service_name" {
-  description = "The name of the app ECS service"
-  value       = aws_ecs_service.app.name
+  description = "The name of the app ECS service (null when deploy_ecs_services is false)"
+  value       = var.deploy_ecs_services ? aws_ecs_service.app[0].name : null
 }
 
 # -----------------------------------------------------------------------------
@@ -223,6 +223,11 @@ output "certificate_validation_records" {
 output "ses_domain_identity_arn" {
   description = "The ARN of the SES domain identity"
   value       = aws_ses_domain_identity.vireo.arn
+}
+
+output "ses_verification_token" {
+  description = "The verification token for the SES domain identity. Create a TXT record named _amazonses.<domain> with this value."
+  value       = aws_ses_domain_identity.vireo.verification_token
 }
 
 # -----------------------------------------------------------------------------

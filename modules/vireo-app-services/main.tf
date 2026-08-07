@@ -659,12 +659,16 @@ resource "aws_cloudwatch_log_group" "app" {
 # =============================================================================
 # Task definitions are managed via external JSON files and deployed via CI/CD.
 # The ECS services reference the latest active revision by family.
+# Gated on deploy_ecs_services to allow initial infrastructure provisioning
+# before task definitions are registered.
 
 data "aws_ecs_task_definition" "proxy" {
+  count           = var.deploy_ecs_services ? 1 : 0
   task_definition = var.proxy_task_family
 }
 
 data "aws_ecs_task_definition" "app" {
+  count           = var.deploy_ecs_services ? 1 : 0
   task_definition = var.app_task_family
 }
 
@@ -674,9 +678,10 @@ data "aws_ecs_task_definition" "app" {
 
 # Proxy service — public ALB → proxy container on port 8080
 resource "aws_ecs_service" "proxy" {
+  count                              = var.deploy_ecs_services ? 1 : 0
   name                               = "${local.proxy_name_prefix}-service"
   cluster                            = var.ecs_cluster_id
-  task_definition                    = data.aws_ecs_task_definition.proxy.arn
+  task_definition                    = data.aws_ecs_task_definition.proxy[0].arn
   desired_count                      = var.proxy_task_count
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 50
@@ -706,9 +711,10 @@ resource "aws_ecs_service" "proxy" {
 
 # App service — internal ALB → app container on port 9000
 resource "aws_ecs_service" "app" {
+  count                              = var.deploy_ecs_services ? 1 : 0
   name                               = "${local.name_prefix}-service"
   cluster                            = var.ecs_cluster_id
-  task_definition                    = data.aws_ecs_task_definition.app.arn
+  task_definition                    = data.aws_ecs_task_definition.app[0].arn
   desired_count                      = var.vireo_task_count
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 50
