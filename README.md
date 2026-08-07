@@ -66,7 +66,7 @@ graph TB
     IAM --- ECS
 ```
 
-Database creation belongs to `dspace-app-services`. Foundation retains deprecated existing-database lookup outputs only for compatibility and rejects `deploy_database = true` with migration guidance.
+Database creation belongs to the respective `app-services` layer module. Foundation modules may retain deprecated existing-database lookup outputs only for compatibility and rejects `deploy_database = true` with migration guidance.
 
 ## Requirements
 
@@ -130,7 +130,7 @@ terraform-docs markdown table --output-file README.md --output-mode inject modul
 
 ## Contributing and support
 
-Contributions are welcome from JHU DRCC staff and faculty. Report issues through [GitHub Issues](https://github.com/jhu-library-devops/terraform-aws-jhu-drcc/issues). Never commit credentials, private endpoints, state files, plans, or unreviewed repository data.
+Contributions are welcome from DRCC staff and Hopkins faculty. Report issues through [GitHub Issues](https://github.com/jhu-library-devops/terraform-aws-jhu-drcc/issues). Never commit credentials, private endpoints, state files, plans, or unreviewed repository data.
 
 ## License
 
