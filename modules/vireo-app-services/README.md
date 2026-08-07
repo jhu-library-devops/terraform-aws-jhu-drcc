@@ -86,15 +86,11 @@ No modules.
 |------|------|
 | [aws_acm_certificate.vireo](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
 | [aws_cloudwatch_dashboard.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
-| [aws_cloudwatch_event_rule.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
-| [aws_cloudwatch_event_target.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
 | [aws_cloudwatch_log_group.app](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
-| [aws_cloudwatch_log_group.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.proxy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.alb_internal_5xx_errors](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.alb_proxy_unhealthy_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.alb_public_5xx_errors](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
-| [aws_cloudwatch_metric_alarm.ecs_long_running_tasks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_db_instance.vireo](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance) | resource |
 | [aws_db_subnet_group.vireo](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_subnet_group) | resource |
 | [aws_ecr_repository.vireo](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
@@ -105,20 +101,16 @@ No modules.
 | [aws_efs_mount_target.vireo_asset_store](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/efs_mount_target) | resource |
 | [aws_iam_role.app_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.app_task_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.proxy_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role.proxy_task_execution](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy.app_task_ecs_exec_msgs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.app_task_efs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.app_task_execution_ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_iam_role_policy.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.proxy_task_ecs_exec_msgs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.proxy_task_execution_ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.proxy_task_ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy_attachment.app_task_execution_base](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_iam_role_policy_attachment.proxy_task_execution_base](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_lambda_function.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
-| [aws_lambda_permission.long_running_task_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_lb.internal](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
 | [aws_lb.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
 | [aws_lb_listener.http_redirect](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
@@ -155,7 +147,6 @@ No modules.
 | [aws_security_group_rule.public_alb_ingress_http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_security_group_rule.public_alb_ingress_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) | resource |
 | [aws_ses_domain_identity.vireo](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ses_domain_identity) | resource |
-| [aws_sns_topic.long_running_tasks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_ssm_parameter.app_auth_service_url](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.app_cors_allow_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_ssm_parameter.app_db_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
@@ -197,8 +188,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_alb_access_logs_enabled"></a> [alb\_access\_logs\_enabled](#input\_alb\_access\_logs\_enabled) | Whether to enable ALB access logs to S3. Disabled by default. | `bool` | `false` | no |
 | <a name="input_alb_access_logs_retention_days"></a> [alb\_access\_logs\_retention\_days](#input\_alb\_access\_logs\_retention\_days) | Number of days to retain ALB access logs in S3. | `number` | `90` | no |
-| <a name="input_app_container_name"></a> [app\_container\_name](#input\_app\_container\_name) | The container name in the Vireo app task definition. | `string` | n/a | yes |
-| <a name="input_app_task_family"></a> [app\_task\_family](#input\_app\_task\_family) | The ECS task definition family name for the Vireo app (externally managed). | `string` | n/a | yes |
+| <a name="input_app_container_name"></a> [app\_container\_name](#input\_app\_container\_name) | The container name in the Vireo app task definition. Required when deploy\_ecs\_services is true. | `string` | `null` | no |
+| <a name="input_app_task_family"></a> [app\_task\_family](#input\_app\_task\_family) | The ECS task definition family name for the Vireo app (externally managed). Required when deploy\_ecs\_services is true. | `string` | `null` | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region. | `string` | `"us-east-1"` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The days to retain backups for. | `number` | `1` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | If the DB instance should have deletion protection enabled. | `bool` | `false` | no |
@@ -208,6 +199,7 @@ No modules.
 | <a name="input_db_skip_final_snapshot"></a> [db\_skip\_final\_snapshot](#input\_db\_skip\_final\_snapshot) | Determines whether a final DB snapshot is created before deletion. | `bool` | `true` | no |
 | <a name="input_db_username"></a> [db\_username](#input\_db\_username) | The username for the database. | `string` | `"vireo"` | no |
 | <a name="input_deploy_database"></a> [deploy\_database](#input\_deploy\_database) | Whether to deploy a new RDS PostgreSQL database. | `bool` | `true` | no |
+| <a name="input_deploy_ecs_services"></a> [deploy\_ecs\_services](#input\_deploy\_ecs\_services) | Whether to create the ECS services. Set to false for initial infrastructure provisioning before task definitions are registered. | `bool` | `true` | no |
 | <a name="input_ecr_force_delete"></a> [ecr\_force\_delete](#input\_ecr\_force\_delete) | Whether to allow force deletion of the ECR repository (including images). | `bool` | `false` | no |
 | <a name="input_ecs_cluster_id"></a> [ecs\_cluster\_id](#input\_ecs\_cluster\_id) | The ID of the shared ECS cluster. | `string` | n/a | yes |
 | <a name="input_efs_one_zone_az"></a> [efs\_one\_zone\_az](#input\_efs\_one\_zone\_az) | Availability zone for One Zone EFS storage. Set to null for Multi-AZ (default). | `string` | `null` | no |
@@ -219,9 +211,9 @@ No modules.
 | <a name="input_organization"></a> [organization](#input\_organization) | The organization name. | `string` | n/a | yes |
 | <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs. | `list(string)` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | The project name used in resource naming and SSM parameter paths. | `string` | `"vireo"` | no |
-| <a name="input_proxy_container_name"></a> [proxy\_container\_name](#input\_proxy\_container\_name) | The container name in the proxy task definition. | `string` | n/a | yes |
+| <a name="input_proxy_container_name"></a> [proxy\_container\_name](#input\_proxy\_container\_name) | The container name in the proxy task definition. Required when deploy\_ecs\_services is true. | `string` | `null` | no |
 | <a name="input_proxy_task_count"></a> [proxy\_task\_count](#input\_proxy\_task\_count) | The number of proxy tasks to run. | `number` | `1` | no |
-| <a name="input_proxy_task_family"></a> [proxy\_task\_family](#input\_proxy\_task\_family) | The ECS task definition family name for the proxy (externally managed). | `string` | n/a | yes |
+| <a name="input_proxy_task_family"></a> [proxy\_task\_family](#input\_proxy\_task\_family) | The ECS task definition family name for the proxy (externally managed). Required when deploy\_ecs\_services is true. | `string` | `null` | no |
 | <a name="input_public_domain"></a> [public\_domain](#input\_public\_domain) | The public domain name for Vireo (used for ALB host-based routing). | `string` | n/a | yes |
 | <a name="input_public_subnet_ids"></a> [public\_subnet\_ids](#input\_public\_subnet\_ids) | List of public subnet IDs (for ALB placement). | `list(string)` | n/a | yes |
 | <a name="input_s3_bucket_force_destroy"></a> [s3\_bucket\_force\_destroy](#input\_s3\_bucket\_force\_destroy) | Whether to allow force destruction of the S3 bucket. | `bool` | `false` | no |
@@ -245,8 +237,8 @@ No modules.
 | <a name="output_alb_zone_id"></a> [alb\_zone\_id](#output\_alb\_zone\_id) | The hosted zone ID of the public ALB (for Route53 alias records) |
 | <a name="output_app_log_group_name"></a> [app\_log\_group\_name](#output\_app\_log\_group\_name) | The name of the app CloudWatch log group |
 | <a name="output_app_security_group_id"></a> [app\_security\_group\_id](#output\_app\_security\_group\_id) | The ID of the app ECS security group |
-| <a name="output_app_service_arn"></a> [app\_service\_arn](#output\_app\_service\_arn) | The ARN of the app ECS service |
-| <a name="output_app_service_name"></a> [app\_service\_name](#output\_app\_service\_name) | The name of the app ECS service |
+| <a name="output_app_service_arn"></a> [app\_service\_arn](#output\_app\_service\_arn) | The ARN of the app ECS service (null when deploy\_ecs\_services is false) |
+| <a name="output_app_service_name"></a> [app\_service\_name](#output\_app\_service\_name) | The name of the app ECS service (null when deploy\_ecs\_services is false) |
 | <a name="output_app_target_group_arn"></a> [app\_target\_group\_arn](#output\_app\_target\_group\_arn) | The ARN of the app ALB target group (internal) |
 | <a name="output_app_task_execution_role_arn"></a> [app\_task\_execution\_role\_arn](#output\_app\_task\_execution\_role\_arn) | The ARN of the app ECS task execution role |
 | <a name="output_app_task_role_arn"></a> [app\_task\_role\_arn](#output\_app\_task\_role\_arn) | The ARN of the app ECS task role |
@@ -264,8 +256,8 @@ No modules.
 | <a name="output_internal_hosted_zone_name"></a> [internal\_hosted\_zone\_name](#output\_internal\_hosted\_zone\_name) | The name of the Route53 private hosted zone for the internal ALB |
 | <a name="output_proxy_log_group_name"></a> [proxy\_log\_group\_name](#output\_proxy\_log\_group\_name) | The name of the proxy CloudWatch log group |
 | <a name="output_proxy_security_group_id"></a> [proxy\_security\_group\_id](#output\_proxy\_security\_group\_id) | The ID of the proxy ECS security group |
-| <a name="output_proxy_service_arn"></a> [proxy\_service\_arn](#output\_proxy\_service\_arn) | The ARN of the proxy ECS service |
-| <a name="output_proxy_service_name"></a> [proxy\_service\_name](#output\_proxy\_service\_name) | The name of the proxy ECS service |
+| <a name="output_proxy_service_arn"></a> [proxy\_service\_arn](#output\_proxy\_service\_arn) | The ARN of the proxy ECS service (null when deploy\_ecs\_services is false) |
+| <a name="output_proxy_service_name"></a> [proxy\_service\_name](#output\_proxy\_service\_name) | The name of the proxy ECS service (null when deploy\_ecs\_services is false) |
 | <a name="output_proxy_target_group_arn"></a> [proxy\_target\_group\_arn](#output\_proxy\_target\_group\_arn) | The ARN of the proxy ALB target group |
 | <a name="output_proxy_task_execution_role_arn"></a> [proxy\_task\_execution\_role\_arn](#output\_proxy\_task\_execution\_role\_arn) | The ARN of the proxy ECS task execution role |
 | <a name="output_proxy_task_role_arn"></a> [proxy\_task\_role\_arn](#output\_proxy\_task\_role\_arn) | The ARN of the proxy ECS task role |
@@ -273,5 +265,6 @@ No modules.
 | <a name="output_s3_bucket_arn"></a> [s3\_bucket\_arn](#output\_s3\_bucket\_arn) | The ARN of the S3 bucket for ETL jobs |
 | <a name="output_s3_bucket_name"></a> [s3\_bucket\_name](#output\_s3\_bucket\_name) | The name of the S3 bucket for ETL jobs |
 | <a name="output_ses_domain_identity_arn"></a> [ses\_domain\_identity\_arn](#output\_ses\_domain\_identity\_arn) | The ARN of the SES domain identity |
+| <a name="output_ses_verification_token"></a> [ses\_verification\_token](#output\_ses\_verification\_token) | The verification token for the SES domain identity. Create a TXT record named \_amazonses.<domain> with this value. |
 | <a name="output_waf_web_acl_arn"></a> [waf\_web\_acl\_arn](#output\_waf\_web\_acl\_arn) | The ARN of the WAFv2 Web ACL attached to the public ALB |
 <!-- END_TF_DOCS -->
