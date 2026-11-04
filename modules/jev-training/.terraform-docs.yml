@@ -1,0 +1,24 @@
+# terraform-docs config for the jev-training module.
+# Pinned to v0.24.0 (matches the JHU house convention / setup-terraform-docs action).
+# Regenerate with: terraform-docs .   (or `make docs` from the repo root)
+formatter: markdown table
+
+output:
+  file: README.md
+  mode: inject
+  template: |-
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->
+
+sort:
+  enabled: true
+  by: required
+
+settings:
+  anchor: true
+  color: true
+  default: true
+  description: true
+  required: true
+  type: true
