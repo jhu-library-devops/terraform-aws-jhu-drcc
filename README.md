@@ -10,6 +10,7 @@ Reusable Terraform/OpenTofu modules for deploying containerized applications on 
 | [drcc-foundation](./modules/drcc-foundation/) | VPC, ECS cluster, ALBs, RDS, IAM, WAF, service discovery | None |
 | [solr-search-cluster](./modules/solr-search-cluster/) | Multi-node Solr cluster with Zookeeper on ECS/EFS | drcc-foundation |
 | [dspace-app-services](./modules/dspace-app-services/) | DSpace Angular UI, REST API, background jobs, S3 asset store | drcc-foundation |
+| [jev-prod-capacity](./modules/jev-prod-capacity/) | Supporting IAM + egress SG for an AgentCore capacity provider (dedicated c7g.4xlarge on-demand fleet backing a provisioned Jev runtime); off by default | none |
 
 ## Architecture
 
