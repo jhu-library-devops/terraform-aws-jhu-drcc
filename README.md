@@ -10,6 +10,7 @@ Reusable Terraform/OpenTofu modules for deploying containerized applications on 
 | [drcc-foundation](./modules/drcc-foundation/) | VPC, ECS cluster, ALBs, RDS, IAM, WAF, service discovery | None |
 | [solr-search-cluster](./modules/solr-search-cluster/) | Multi-node Solr cluster with Zookeeper on ECS/EFS | drcc-foundation |
 | [dspace-app-services](./modules/dspace-app-services/) | DSpace Angular UI, REST API, background jobs, S3 asset store | drcc-foundation |
+| [jev-training](./modules/jev-training/) | Optional fine-tuning infra for the Jev decider: encrypted S3 artifacts bucket + least-privilege SageMaker execution role (off by default) | none |
 
 ## Architecture
 
