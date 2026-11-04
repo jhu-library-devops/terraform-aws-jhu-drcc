@@ -9,6 +9,10 @@ The JHU Terraform Module Library is designed to provide a consistent and scalabl
 
 The following modules are currently available in this library:
 
+| Module | Description | Latest |
+|--------|-------------|--------|
+| [`jev-agentcore`](modules/jev-agentcore) | Surrounding AWS infra for a **Jev** Strands-Decider decision agent on Bedrock AgentCore Runtime: invoke IAM policy, optional warm-up ping (EventBridge Scheduler + Lambda), optional DynamoDB decision/idempotency log. Provider-agnostic; takes the AgentCore runtime ARN. | `jev-agentcore-v0.1.0` |
+
 
 ## Getting Started
 
