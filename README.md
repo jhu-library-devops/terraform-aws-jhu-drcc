@@ -2,6 +2,10 @@
 
 Reusable Terraform/OpenTofu modules for deploying containerized applications on AWS. Built by the JHU Digital Research and Curation Center for production use by students, faculty, and staff.
 
+| Module | Description | Latest |
+|--------|-------------|--------|
+| [`jev-agentcore`](modules/jev-agentcore) | Surrounding AWS infra for a **Jev** Strands-Decider decision agent on Bedrock AgentCore Runtime: invoke IAM policy, optional warm-up ping (EventBridge Scheduler + Lambda), optional DynamoDB decision/idempotency log. Provider-agnostic; takes the AgentCore runtime ARN. | `jev-agentcore-v0.1.0` |
+
 
 ## Modules
 
