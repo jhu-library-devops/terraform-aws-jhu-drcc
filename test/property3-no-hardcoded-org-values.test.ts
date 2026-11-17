@@ -7,7 +7,7 @@
  * S3 bucket names not derived from variables, hardcoded AWS account IDs,
  * or static IAM role names) unless those values are derived from input variables.
  *
- * **Validates: Requirements 4.1, 4.2, 4.3, 4.4**
+ * **Validates: Requirements 2.5, 2.7, 4.1, 4.2, 4.3, 4.4, 9.1, 10.1, 10.2**
  *
  * Feature: iac-blueprint-analysis, Property 3: No hardcoded organization-specific values in resource attributes
  */
@@ -44,6 +44,21 @@ const ORG_SPECIFIC_PATTERNS: { pattern: RegExp; description: string; requirement
     pattern: /["']390157243417\.dkr\.ecr\./,
     description: 'Hardcoded AWS account ID in container image reference',
     requirement: '4.4',
+  },
+  {
+    pattern: /"jhu-vireo"/,
+    description: 'Hardcoded JHU Vireo ECR repository name',
+    requirement: '9.1',
+  },
+  {
+    pattern: /vireo\.library\.jhu\.edu/,
+    description: 'Hardcoded JHU Vireo SES email domain',
+    requirement: '2.7',
+  },
+  {
+    pattern: /["']\/vireo\/(?:proxy\/)?(?!\$\{)/,
+    description: 'Hardcoded Vireo SSM path prefix (not using var.project_name)',
+    requirement: '10.1',
   },
 ];
 
