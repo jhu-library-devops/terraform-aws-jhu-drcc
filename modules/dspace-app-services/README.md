@@ -23,21 +23,22 @@ The DSpace application is deployed as three separate ECS services:
 All services share the same ECS cluster and can scale independently.
 
 <!-- BEGIN_TF_DOCS -->
-
-
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.6 |
+| <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_archive"></a> [archive](#provider\_archive) | n/a |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 5.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| ---- | ------- |
+| <a name="provider_archive"></a> [archive](#provider\_archive) | 2.8.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.100.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -47,7 +48,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_dashboard.dspace_application](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_dashboard) | resource |
 | [aws_cloudwatch_event_rule.dspace_jobs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
 | [aws_cloudwatch_event_target.dspace_jobs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) | resource |
@@ -102,25 +103,27 @@ No modules.
 | [aws_security_group.rds](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_sns_topic.dspace_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic) | resource |
 | [aws_sns_topic_subscription.email_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sns_topic_subscription) | resource |
+| [aws_vpc_security_group_egress_rule.db_egress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_egress_rule) | resource |
 | [aws_vpc_security_group_ingress_rule.db_ingress_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
 | [random_password.db](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [terraform_data.validate_task_definition_config](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.init_lambda](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_db_instance.existing](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance) | data source |
 | [aws_iam_openid_connect_provider.github_actions](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_openid_connect_provider) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alarm_notification_email"></a> [alarm\_notification\_email](#input\_alarm\_notification\_email) | Email address for CloudWatch alarm notifications. | `string` | n/a | yes |
 | <a name="input_alb_https_listener_arn"></a> [alb\_https\_listener\_arn](#input\_alb\_https\_listener\_arn) | The ARN of the public ALB HTTPS listener. | `string` | n/a | yes |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"us-east-1"` | no |
 | <a name="input_create_github_oidc_provider"></a> [create\_github\_oidc\_provider](#input\_create\_github\_oidc\_provider) | Whether to create the GitHub Actions OIDC identity provider. Set to false if the provider already exists in the AWS account. | `bool` | `false` | no |
 | <a name="input_db_allocated_storage"></a> [db\_allocated\_storage](#input\_db\_allocated\_storage) | The allocated storage in gigabytes for the RDS database. | `number` | `20` | no |
 | <a name="input_db_backup_retention_period"></a> [db\_backup\_retention\_period](#input\_db\_backup\_retention\_period) | The days to retain backups for. Must be > 0 to enable backups. Recommended: 7+ for production. | `number` | `7` | no |
-| <a name="input_db_credentials_secret_arn_override"></a> [db\_credentials\_secret\_arn\_override](#input\_db\_credentials\_secret\_arn\_override) | The ARN of an existing Secrets Manager secret containing database credentials. | `string` | `null` | no |
+| <a name="input_db_credentials_secret_arn_override"></a> [db\_credentials\_secret\_arn\_override](#input\_db\_credentials\_secret\_arn\_override) | ARN of an existing Secrets Manager JSON secret containing url, username, password, host, port, and dbname fields. Used by module-managed DSpace tasks and initialization when deploy\_database is false. | `string` | `null` | no |
 | <a name="input_db_deletion_protection"></a> [db\_deletion\_protection](#input\_db\_deletion\_protection) | If the DB instance should have deletion protection enabled. Should be true for production. | `bool` | `false` | no |
 | <a name="input_db_engine_version"></a> [db\_engine\_version](#input\_db\_engine\_version) | The engine version of the RDS instance. | `string` | `"17.4"` | no |
 | <a name="input_db_instance_class"></a> [db\_instance\_class](#input\_db\_instance\_class) | The instance class for the RDS database. | `string` | `"db.t3.micro"` | no |
@@ -136,7 +139,7 @@ No modules.
 | <a name="input_dspace_admin_email"></a> [dspace\_admin\_email](#input\_dspace\_admin\_email) | Email address for the initial DSpace administrator account | `string` | `"admin@example.com"` | no |
 | <a name="input_dspace_admin_first_name"></a> [dspace\_admin\_first\_name](#input\_dspace\_admin\_first\_name) | First name for the initial DSpace administrator account | `string` | `"Admin"` | no |
 | <a name="input_dspace_admin_last_name"></a> [dspace\_admin\_last\_name](#input\_dspace\_admin\_last\_name) | Last name for the initial DSpace administrator account | `string` | `"User"` | no |
-| <a name="input_dspace_admin_password"></a> [dspace\_admin\_password](#input\_dspace\_admin\_password) | Password for the initial DSpace administrator account. Must be changed after first login. | `string` | `null` | no |
+| <a name="input_dspace_admin_password"></a> [dspace\_admin\_password](#input\_dspace\_admin\_password) | Deprecated and not injected into task definitions. Store the initial administrator password in Secrets Manager and set dspace\_admin\_password\_secret\_arn. | `string` | `null` | no |
 | <a name="input_dspace_admin_password_secret_arn"></a> [dspace\_admin\_password\_secret\_arn](#input\_dspace\_admin\_password\_secret\_arn) | ARN of a Secrets Manager secret containing the DSpace administrator password as a plaintext string. When provided, the password is injected securely at runtime rather than stored in the task definition. The secret value must be the password string itself (not a JSON object). | `string` | `null` | no |
 | <a name="input_dspace_angular_cpu"></a> [dspace\_angular\_cpu](#input\_dspace\_angular\_cpu) | The CPU units for the DSpace Angular task. | `number` | `2048` | no |
 | <a name="input_dspace_angular_image"></a> [dspace\_angular\_image](#input\_dspace\_angular\_image) | Docker image URI for DSpace Angular container | `string` | `null` | no |
@@ -153,9 +156,9 @@ No modules.
 | <a name="input_dspace_api_task_count"></a> [dspace\_api\_task\_count](#input\_dspace\_api\_task\_count) | The number of DSpace API tasks to run. | `number` | `1` | no |
 | <a name="input_dspace_api_task_def_arn"></a> [dspace\_api\_task\_def\_arn](#input\_dspace\_api\_task\_def\_arn) | The ARN of the ECS Task Definition for DSpace Api. | `string` | `null` | no |
 | <a name="input_dspace_asset_store_bucket_name"></a> [dspace\_asset\_store\_bucket\_name](#input\_dspace\_asset\_store\_bucket\_name) | The name of the S3 bucket for DSpace asset store. | `string` | n/a | yes |
-| <a name="input_dspace_db_password_ssm_arn"></a> [dspace\_db\_password\_ssm\_arn](#input\_dspace\_db\_password\_ssm\_arn) | ARN of SSM parameter containing database password | `string` | `null` | no |
-| <a name="input_dspace_db_url_ssm_arn"></a> [dspace\_db\_url\_ssm\_arn](#input\_dspace\_db\_url\_ssm\_arn) | ARN of SSM parameter containing database URL | `string` | `null` | no |
-| <a name="input_dspace_db_username_ssm_arn"></a> [dspace\_db\_username\_ssm\_arn](#input\_dspace\_db\_username\_ssm\_arn) | ARN of SSM parameter containing database username | `string` | `null` | no |
+| <a name="input_dspace_db_password_ssm_arn"></a> [dspace\_db\_password\_ssm\_arn](#input\_dspace\_db\_password\_ssm\_arn) | Legacy SSM parameter ARN containing the database password, used only when no database credentials secret is configured | `string` | `null` | no |
+| <a name="input_dspace_db_url_ssm_arn"></a> [dspace\_db\_url\_ssm\_arn](#input\_dspace\_db\_url\_ssm\_arn) | Legacy SSM parameter ARN containing the database URL, used only when no database credentials secret is configured | `string` | `null` | no |
+| <a name="input_dspace_db_username_ssm_arn"></a> [dspace\_db\_username\_ssm\_arn](#input\_dspace\_db\_username\_ssm\_arn) | Legacy SSM parameter ARN containing the database username, used only when no database credentials secret is configured | `string` | `null` | no |
 | <a name="input_dspace_google_analytics_api_secret_ssm_arn"></a> [dspace\_google\_analytics\_api\_secret\_ssm\_arn](#input\_dspace\_google\_analytics\_api\_secret\_ssm\_arn) | ARN of SSM parameter containing Google Analytics API secret | `string` | `null` | no |
 | <a name="input_dspace_google_analytics_cron_ssm_arn"></a> [dspace\_google\_analytics\_cron\_ssm\_arn](#input\_dspace\_google\_analytics\_cron\_ssm\_arn) | ARN of SSM parameter containing Google Analytics cron schedule | `string` | `null` | no |
 | <a name="input_dspace_google_analytics_key_ssm_arn"></a> [dspace\_google\_analytics\_key\_ssm\_arn](#input\_dspace\_google\_analytics\_key\_ssm\_arn) | ARN of SSM parameter containing Google Analytics key | `string` | `null` | no |
@@ -197,14 +200,14 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_dashboard_name"></a> [dashboard\_name](#output\_dashboard\_name) | The name of the CloudWatch dashboard |
 | <a name="output_dashboard_url"></a> [dashboard\_url](#output\_dashboard\_url) | The URL to access the CloudWatch dashboard |
 | <a name="output_db_credentials_secret_arn"></a> [db\_credentials\_secret\_arn](#output\_db\_credentials\_secret\_arn) | The ARN of the database credentials secret |
 | <a name="output_db_init_task_definition_arn"></a> [db\_init\_task\_definition\_arn](#output\_db\_init\_task\_definition\_arn) | ARN of the database initialization task definition |
-| <a name="output_db_instance_endpoint"></a> [db\_instance\_endpoint](#output\_db\_instance\_endpoint) | The endpoint of the RDS instance |
-| <a name="output_db_instance_id"></a> [db\_instance\_id](#output\_db\_instance\_id) | The ID of the RDS instance |
-| <a name="output_db_instance_identifier"></a> [db\_instance\_identifier](#output\_db\_instance\_identifier) | The identifier of the RDS instance |
+| <a name="output_db_instance_endpoint"></a> [db\_instance\_endpoint](#output\_db\_instance\_endpoint) | The endpoint of the managed or caller-supplied existing RDS instance |
+| <a name="output_db_instance_id"></a> [db\_instance\_id](#output\_db\_instance\_id) | The ID of the managed or caller-supplied existing RDS instance |
+| <a name="output_db_instance_identifier"></a> [db\_instance\_identifier](#output\_db\_instance\_identifier) | The identifier of the managed or caller-supplied existing RDS instance |
 | <a name="output_dspace_alerts_topic_arn"></a> [dspace\_alerts\_topic\_arn](#output\_dspace\_alerts\_topic\_arn) | The ARN of the DSpace alerts SNS topic |
 | <a name="output_dspace_angular_service_arn"></a> [dspace\_angular\_service\_arn](#output\_dspace\_angular\_service\_arn) | The ARN of the DSpace Angular ECS service |
 | <a name="output_dspace_angular_service_name"></a> [dspace\_angular\_service\_name](#output\_dspace\_angular\_service\_name) | The name of the DSpace Angular ECS service |
@@ -235,7 +238,7 @@ No modules.
 ## Examples
 
 See the [examples](../../examples/) directory for complete usage examples:
-- [Complete](../../examples/complete/) - Full DSpace deployment
+- [Complete](../../examples/dspace-complete/) - Full DSpace deployment
 
 ## Task Definition Management
 
@@ -266,7 +269,8 @@ Set `use_external_task_definitions = false` to let Terraform create and manage t
 - `dspace_api_image` - Docker image URI for DSpace API
 - `dspace_angular_image` - Docker image URI for DSpace Angular
 - `dspace_jobs_image` - Docker image URI for DSpace Jobs
-- All SSM parameter ARN variables (see SSM Parameters section below)
+- Non-database SSM parameter ARN variables required by your DSpace configuration (see SSM Parameters below)
+- Database credentials via the managed/generated secret, `db_credentials_secret_arn_override`, or the three legacy database SSM parameters
 - `dspace_asset_store_bucket_name` - S3 bucket name for asset storage
 
 **Optional Variables:**
@@ -300,21 +304,22 @@ dspace_asset_store_bucket_name = "jhu-prod-dspace-assets"
 # SSM parameter ARNs (see SSM Parameters section)
 dspace_server_url_ssm_arn     = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/server-url"
 dspace_ui_url_ssm_arn         = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/ui-url"
-dspace_db_url_ssm_arn         = "arn:aws:ssm:us-east-1:123456789012:parameter/dspace/prod/db-url"
+# Database credentials come from the managed Secrets Manager secret.
+# Existing-database mode can set db_credentials_secret_arn_override.
 # ... (see full list below)
 ```
 
-### SSM Parameters (Required for Terraform-Managed Mode)
+### Runtime parameters for Terraform-managed mode
 
-When `use_external_task_definitions = false`, provide ARNs for these SSM parameters:
+When `use_external_task_definitions = false`, provide the non-database SSM parameter ARNs needed by your deployment. Managed RDS credentials are injected from the module-created Secrets Manager secret. Existing-database mode should provide `db_credentials_secret_arn_override` with `url`, `username`, `password`, `host`, `port`, and `dbname` JSON fields; the three database SSM parameters remain a fallback only when no credentials secret is configured.
 
 **DSpace API & Jobs:**
 - `dspace_server_url_ssm_arn` - DSpace server URL
 - `dspace_server_ssr_url_ssm_arn` - DSpace server-side rendering URL
 - `dspace_ui_url_ssm_arn` - DSpace UI URL
-- `dspace_db_url_ssm_arn` - Database connection URL
-- `dspace_db_username_ssm_arn` - Database username
-- `dspace_db_password_ssm_arn` - Database password
+- `dspace_db_url_ssm_arn` - Legacy database URL fallback when no credentials secret is configured
+- `dspace_db_username_ssm_arn` - Legacy database username fallback when no credentials secret is configured
+- `dspace_db_password_ssm_arn` - Legacy database password fallback when no credentials secret is configured
 - `dspace_solr_url_ssm_arn` - Solr server URL
 - `dspace_mail_server_ssm_arn` - Mail server hostname
 - `dspace_mail_port_ssm_arn` - Mail server port
@@ -332,9 +337,9 @@ When `use_external_task_definitions = false`, provide ARNs for these SSM paramet
 - `dspace_rest_ssr_url_ssm_arn` - REST API SSR base URL
 - `dspace_angular_node_opts_ssm_arn` - NODE_OPTIONS for Angular
 
-### Lifecycle Policies
+### Lifecycle policy caveat
 
-Task definitions include `lifecycle { ignore_changes = [container_definitions] }` to prevent Terraform from detecting drift when CI/CD pipelines update container images. Non-image configuration changes (CPU, memory, IAM roles) still trigger Terraform updates.
+Task definitions currently use `lifecycle { ignore_changes = [container_definitions] }` to preserve image revisions registered by CI/CD. This also suppresses drift for environment and secret references inside the container JSON. Prefer `use_external_task_definitions = true` when CI/CD owns revisions. Existing module-managed deployments adopting new secret references need a reviewed one-time task-definition replacement, followed by a full plan.
 
 ## Migration Guide
 
@@ -500,4 +505,4 @@ Consider using ECS auto-scaling for production workloads.
 
 ## Production Deployment
 
-For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/complete/PRODUCTION.md).
+For production configuration, security hardening, scaling guidance, and operational procedures, see the [Production Deployment Guide](../../examples/dspace-complete/PRODUCTION.md).

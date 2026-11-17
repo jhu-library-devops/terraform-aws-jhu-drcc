@@ -14,7 +14,9 @@ organization  = "jhu"                        # [REQUIRED] Your institution's sho
 project_name  = "dspace"                     # [OPTIONAL] Project identifier
 environment   = "stage"                      # [REQUIRED] Environment name
 aws_region    = "us-east-1"                  # [OPTIONAL] AWS region
-public_domain = "dspace-stage.example.edu"   # [REQUIRED] Public domain for staging
+public_domain         = "dspace-stage.example.edu" # [REQUIRED] Public domain for staging
+create_ssl_certificate = false # [REQUIRED] Reuse a validated ACM certificate for a one-pass deployment
+ssl_certificate_arn     = "arn:aws:acm:us-east-1:123456789012:certificate/replace-me"
 
 # --- VPC Configuration (REQUIRED) ---
 # Use a different CIDR range than production to allow VPC peering if needed.
@@ -35,8 +37,6 @@ db_multi_az          = false                 # [OPTIONAL] Disable Multi-AZ to sa
 solr_node_count      = 3                     # [REQUIRED] Fewer nodes than production
 deploy_zookeeper     = true                  # [REQUIRED] Deploy Zookeeper ensemble
 zookeeper_task_count = 3                     # [REQUIRED] Zookeeper nodes
-solr_cpu             = "2048"                # [REQUIRED] CPU units per Solr task
-solr_memory          = "4096"                # [REQUIRED] Memory in MiB per Solr task
 
 # --- DSpace Application Configuration (REQUIRED) ---
 dspace_angular_task_count = 2                # [REQUIRED] Fewer tasks than production
@@ -83,9 +83,6 @@ solr_memory          = 16384                 # [OPTIONAL] Solr memory per node (
 dspace_server_url_ssm_arn     = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/server/url"
 dspace_server_ssr_url_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/server/ssr-url"
 dspace_ui_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/ui/url"
-dspace_db_url_ssm_arn         = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/db/url"
-dspace_db_username_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/db/username"
-dspace_db_password_ssm_arn    = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/db/password"
 dspace_solr_url_ssm_arn       = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/dspace/stage/solr/url"
 
 # Mail server configuration
@@ -116,6 +113,14 @@ dspace_angular_node_opts_ssm_arn = "arn:aws:ssm:us-east-1:ACCOUNT_ID:parameter/d
 dspace_api_log_group_name     = "/ecs/jhu-stage-dspace-api"
 dspace_angular_log_group_name = "/ecs/jhu-stage-dspace-angular"
 dspace_jobs_log_group_name    = "/ecs/jhu-stage-dspace-jobs"
+
+# --- Initialization (OPTIONAL) ---
+# Set these before enabling initialization:
+# dspace_admin_email               = "repository-admin@example.edu"
+# dspace_admin_first_name          = "Repository"
+# dspace_admin_last_name           = "Administrator"
+# dspace_admin_password_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:dspace/stage/admin-password-example"
+enable_init_tasks = false
 
 # --- External Task Definitions (OPTIONAL) ---
 # Only needed when use_external_task_definitions = true.

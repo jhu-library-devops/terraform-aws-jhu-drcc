@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide provides recommendations and best practices for deploying DSpace to production using the DRCC Terraform modules.
+This is a breaking ownership and network-policy upgrade. Follow the repository [Migration and Rollback Guide](../../MIGRATION.md) before changing an existing state.
 
 ## Pre-Deployment Checklist
 
@@ -56,8 +56,8 @@ Consider:
 solr_node_count      = 5      # Odd number for quorum
 deploy_zookeeper     = true
 zookeeper_task_count = 3      # Always use 3 or 5 for production
-solr_cpu             = "4096" # 4 vCPU
-solr_memory          = "8192" # 8 GB RAM
+solr_cpu             = 4096 # 4 vCPU
+solr_memory          = 8192 # 8 GB RAM
 ```
 
 Sizing guidelines:
@@ -111,13 +111,14 @@ Consider:
 - Secrets Manager for sensitive data
 - TLS 1.2+ for all connections
 
-**Additional Hardening:**
+**Production safeguards in `prod.tfvars`:**
 ```hcl
-# In drcc-foundation module
-enable_waf                = true
-enable_deletion_protection = true  # For RDS and ALB
-enable_backup_retention   = 30     # Days
+db_backup_retention_period = 30
+db_deletion_protection     = true
+db_skip_final_snapshot     = false
 ```
+
+Review encryption, KMS, backup, certificate, WAF, and log-retention settings against your organization's controls before applying.
 
 ## Deployment Process
 
@@ -125,7 +126,7 @@ enable_backup_retention   = 30     # Days
 
 1. **Prepare configuration:**
 ```bash
-cd examples/complete
+cd examples/dspace-complete
 cp prod.tfvars.example prod.tfvars
 # Edit prod.tfvars with your values
 ```
@@ -141,17 +142,12 @@ terraform plan -var-file=prod.tfvars -out=prod.tfplan
 # Review all resources carefully
 ```
 
-4. **Apply in stages (recommended):**
+4. **Apply the reviewed full plan:**
 ```bash
-# Stage 1: Foundation only
-terraform apply -target=module.foundation -var-file=prod.tfvars
-
-# Stage 2: Solr cluster
-terraform apply -target=module.solr -var-file=prod.tfvars
-
-# Stage 3: Application services
-terraform apply -target=module.dspace_app -var-file=prod.tfvars
+terraform apply prod.tfplan
 ```
+
+The modules own reciprocal IAM and security-group dependencies. Routine targeted applies can leave only one side of a network contract deployed; reserve `-target` for exceptional recovery directed by a reviewed operator, then immediately reconcile with a full plan.
 
 5. **Verify deployment:**
 ```bash

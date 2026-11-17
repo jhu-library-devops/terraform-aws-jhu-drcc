@@ -146,53 +146,58 @@ resource "aws_wafv2_web_acl" "main" {
     }
   }
 
-  # AWS Managed Rules - user_agent_match_rule overrides user agent rule in Bot Control Rule Set
-  rule {
-    name     = "user_agent_match_rule"
-    priority = 4
+  # Non-browser clients can be blocked globally when a single approved agent is known.
+  # Disable this rule for MCP deployments that support multiple machine clients;
+  # managed rules, application host/body validation, and rate limiting still apply.
+  dynamic "rule" {
+    for_each = var.waf_block_non_browser_user_agents ? [1] : []
 
-    action {
-      block {}
-    }
+    content {
+      name     = "user_agent_match_rule"
+      priority = 4
 
-    statement {
-      and_statement {
+      action {
+        block {}
+      }
 
-        statement {
-          label_match_statement {
-            key   = "awswaf:managed:aws:bot-control:signal:non_browser_user_agent"
-            scope = "LABEL"
+      statement {
+        and_statement {
+          statement {
+            label_match_statement {
+              key   = "awswaf:managed:aws:bot-control:signal:non_browser_user_agent"
+              scope = "LABEL"
+            }
           }
-        }
 
-        statement {
-          not_statement {
-            statement {
-              byte_match_statement {
-                positional_constraint = "EXACTLY"
-                search_string         = "some-approved-user-agent"
+          statement {
+            not_statement {
+              statement {
+                byte_match_statement {
+                  positional_constraint = "EXACTLY"
+                  search_string         = var.waf_approved_non_browser_user_agent
 
-                field_to_match {
-                  single_header {
-                    name = "user-agent"
+                  field_to_match {
+                    single_header {
+                      name = "user-agent"
+                    }
                   }
-                }
 
-                text_transformation {
-                  priority = 0
-                  type     = "NONE"
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
                 }
               }
             }
           }
         }
       }
-    }
 
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "user_agent_match_rule"
-      sampled_requests_enabled   = true
+      visibility_config {
+        cloudwatch_metrics_enabled = true
+        metric_name                = "user_agent_match_rule"
+        sampled_requests_enabled   = true
+      }
     }
   }
 
@@ -235,7 +240,7 @@ resource "aws_wafv2_web_acl" "main" {
 
     statement {
       rate_based_statement {
-        limit              = 2000
+        limit              = var.waf_rate_limit_per_ip
         aggregate_key_type = "IP"
       }
     }

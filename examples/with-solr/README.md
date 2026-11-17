@@ -1,91 +1,28 @@
 # Foundation with Solr Search Cluster
 
-This example deploys the DRCC foundation infrastructure along with a Solr search cluster.
+This example composes `drcc-foundation` and `solr-search-cluster` without deploying DSpace application services or RDS.
 
-## What's Included
+## External database contract
 
-**Foundation Infrastructure:**
-- VPC with public and private subnets
-- Application Load Balancers
-- RDS PostgreSQL database
-- IAM roles and security groups
-- CloudWatch monitoring
+The Solr module currently requires a reachable PostgreSQL endpoint and a Secrets Manager credentials ARN. Supply both as `db_endpoint` and `db_secret_arn`. The foundation execution role is granted read access only to that explicit secret ARN.
 
-**Solr Search Cluster:**
-- ECS cluster with Fargate
-- Solr nodes (configurable count)
-- Zookeeper ensemble (optional)
-- EFS for persistent storage
-- CloudWatch alarms and health checks
-- Service discovery via CloudMap
-
-## Architecture
-
-The Solr cluster is deployed on ECS Fargate with:
-- Individual Solr nodes with DNS-based identities
-- Zookeeper ensemble for cluster coordination
-- EFS volumes for data persistence
-- Private ALB for internal access
-- CloudWatch Synthetics canaries for health monitoring
+The database must be reachable from the new VPC on TCP 5432. This example explicitly enables foundation VPC egress on that port. If the database uses a security group, its ingress must allow the foundation ECS security group and that reciprocal rule must have one Terraform owner. Do not place secret values in tfvars; only the secret ARN belongs there.
 
 ## Usage
 
 ```bash
-# Initialize
-terraform init
+cp dev.tfvars.example dev.tfvars
+# Replace the domain, AWS account ID, database endpoint, and secret ARN.
 
-# Plan with default 3-node cluster
-terraform plan -var="environment=dev"
-
-# Deploy
-terraform apply -var="environment=dev"
-
-# Deploy with custom configuration
-terraform apply \
-  -var="environment=prod" \
-  -var="solr_node_count=5" \
-  -var="solr_cpu=2048" \
-  -var="solr_memory=4096"
+tofu init
+tofu plan -var-file=dev.tfvars -out=dev.tfplan
+tofu apply dev.tfplan
 ```
 
-## Configuration Options
+The sample defaults to a low-cost single Solr node without Zookeeper. For production, use at least three Solr nodes, deploy a three- or five-node Zookeeper ensemble, select reviewed immutable image tags, and review EFS, alarms, and recovery procedures.
 
-### Minimal (Development)
-```hcl
-solr_node_count      = 1
-deploy_zookeeper     = false  # Use embedded Zookeeper
-solr_cpu             = "1024"
-solr_memory          = "2048"
-```
+## Access
 
-### Production
-```hcl
-solr_node_count      = 5
-deploy_zookeeper     = true
-zookeeper_task_count = 3
-solr_cpu             = "4096"
-solr_memory          = "8192"
-db_instance_class    = "db.r5.large"
-```
+Solr is exposed internally through the private ALB at `http://<private_alb_dns_name>:8983/solr` and through Cloud Map node names. It is not directly exposed to the internet.
 
-## Accessing Solr
-
-Solr is accessible via the private ALB:
-- Internal URL: `http://<private_alb_dns_name>:8983/solr`
-- Service discovery: `solr-1.dspace.local`, `solr-2.dspace.local`, etc.
-
-## Next Steps
-
-After deploying, you can:
-1. Add DSpace application services using the `complete` example
-2. Configure Solr collections and schemas
-3. Set up backup and restore procedures
-4. Configure auto-scaling policies
-
-## Cost Optimization
-
-For non-production environments:
-- Set `solr_node_count = 1`
-- Set `deploy_zookeeper = false`
-- Use smaller CPU/memory allocations
-- Consider using Spot instances (requires custom task definition)
+To deploy the full application stack, use [`../dspace-complete`](../dspace-complete/).

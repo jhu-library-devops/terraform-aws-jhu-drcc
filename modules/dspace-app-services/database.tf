@@ -5,6 +5,14 @@
 # These resources are conditionally created based on the deploy_database variable
 
 # -----------------------------------------------------------------------------
+# Existing RDS lookup
+# -----------------------------------------------------------------------------
+data "aws_db_instance" "existing" {
+  count                  = !var.deploy_database && var.db_instance_identifier != null ? 1 : 0
+  db_instance_identifier = var.db_instance_identifier
+}
+
+# -----------------------------------------------------------------------------
 # DB Subnet Group
 # -----------------------------------------------------------------------------
 resource "aws_db_subnet_group" "main" {
@@ -51,6 +59,7 @@ resource "aws_secretsmanager_secret_version" "db" {
     host                 = aws_db_instance.main[0].address
     port                 = aws_db_instance.main[0].port
     dbname               = var.db_name
+    url                  = "jdbc:postgresql://${aws_db_instance.main[0].address}:${aws_db_instance.main[0].port}/${var.db_name}"
     dbInstanceIdentifier = aws_db_instance.main[0].id
   })
   lifecycle { ignore_changes = [secret_string] }
@@ -111,4 +120,18 @@ resource "aws_vpc_security_group_ingress_rule" "db_ingress_rule" {
   to_port                      = 5432
   ip_protocol                  = "tcp"
   referenced_security_group_id = var.ecs_security_group_id
+}
+
+# -----------------------------------------------------------------------------
+# ECS-to-RDS Security Group Egress Rule
+# -----------------------------------------------------------------------------
+resource "aws_vpc_security_group_egress_rule" "db_egress_rule" {
+  count             = var.deploy_database ? 1 : 0
+  security_group_id = var.ecs_security_group_id
+
+  description                  = "Allow DSpace tasks to reach the managed PostgreSQL database"
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.rds[0].id
 }

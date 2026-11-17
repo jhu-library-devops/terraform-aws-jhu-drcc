@@ -14,6 +14,11 @@ resource "terraform_data" "validate_task_definition_config" {
     }
 
     precondition {
+      condition     = !var.enable_init_tasks || var.dspace_admin_password_secret_arn != null
+      error_message = "dspace_admin_password_secret_arn is required when enable_init_tasks = true; plaintext administrator passwords are not embedded in task definitions."
+    }
+
+    precondition {
       condition = !var.use_external_task_definitions || (
         var.dspace_api_task_def_arn != null &&
         var.dspace_angular_task_def_arn != null &&

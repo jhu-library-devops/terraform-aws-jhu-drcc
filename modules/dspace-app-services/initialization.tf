@@ -31,42 +31,34 @@ resource "aws_ecs_task_definition" "db_init" {
         }
       }
 
-      environment = concat(
-        [
-          {
-            name  = "DSPACE_INSTALL_DIR"
-            value = "/dspace"
-          }
-        ],
-        var.dspace_admin_password_secret_arn == null ? [
-          {
-            name  = "DSPACE_ADMIN_PASSWORD"
-            value = coalesce(var.dspace_admin_password, "changeme")
-          }
-        ] : []
-      )
+      environment = [
+        {
+          name  = "DSPACE_INSTALL_DIR"
+          value = "/dspace"
+        }
+      ]
 
       secrets = concat(
-        var.db_secret_arn != null ? [
+        local.init_db_secret_arn != null ? [
           {
             name      = "DB_HOST"
-            valueFrom = "${var.db_secret_arn}:host::"
+            valueFrom = "${local.init_db_secret_arn}:host::"
           },
           {
             name      = "DB_PORT"
-            valueFrom = "${var.db_secret_arn}:port::"
+            valueFrom = "${local.init_db_secret_arn}:port::"
           },
           {
             name      = "DB_NAME"
-            valueFrom = "${var.db_secret_arn}:dbname::"
+            valueFrom = "${local.init_db_secret_arn}:dbname::"
           },
           {
             name      = "DB_USER"
-            valueFrom = "${var.db_secret_arn}:username::"
+            valueFrom = "${local.init_db_secret_arn}:username::"
           },
           {
             name      = "DB_PASSWORD"
-            valueFrom = "${var.db_secret_arn}:password::"
+            valueFrom = "${local.init_db_secret_arn}:password::"
           }
         ] : [],
         var.dspace_admin_password_secret_arn != null ? [
@@ -123,26 +115,26 @@ resource "aws_ecs_task_definition" "solr_init" {
         }
       ]
 
-      secrets = var.db_secret_arn != null ? [
+      secrets = local.init_db_secret_arn != null ? [
         {
           name      = "DB_HOST"
-          valueFrom = "${var.db_secret_arn}:host::"
+          valueFrom = "${local.init_db_secret_arn}:host::"
         },
         {
           name      = "DB_PORT"
-          valueFrom = "${var.db_secret_arn}:port::"
+          valueFrom = "${local.init_db_secret_arn}:port::"
         },
         {
           name      = "DB_NAME"
-          valueFrom = "${var.db_secret_arn}:dbname::"
+          valueFrom = "${local.init_db_secret_arn}:dbname::"
         },
         {
           name      = "DB_USER"
-          valueFrom = "${var.db_secret_arn}:username::"
+          valueFrom = "${local.init_db_secret_arn}:username::"
         },
         {
           name      = "DB_PASSWORD"
-          valueFrom = "${var.db_secret_arn}:password::"
+          valueFrom = "${local.init_db_secret_arn}:password::"
         }
       ] : []
     }

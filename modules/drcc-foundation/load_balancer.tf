@@ -56,12 +56,14 @@ resource "aws_s3_bucket_policy" "alb_logs" {
 
 # Public Application Load Balancer (internet-facing)
 resource "aws_lb" "main" {
-  name               = "${local.name}-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = local.public_subnet_ids
-  tags               = local.tags
+  name                       = "${local.name}-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb_sg.id]
+  subnets                    = local.public_subnet_ids
+  idle_timeout               = var.alb_idle_timeout
+  drop_invalid_header_fields = true
+  tags                       = local.tags
 
   dynamic "access_logs" {
     for_each = var.enable_enhanced_monitoring ? [1] : []

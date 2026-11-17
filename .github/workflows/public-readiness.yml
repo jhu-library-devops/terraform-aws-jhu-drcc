@@ -1,0 +1,140 @@
+name: Public Readiness
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-readiness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_IN_AUTOMATION: "true"
+  TOFU_VERSION: "1.12.5"
+
+jobs:
+  format:
+    name: OpenTofu format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Check recursive formatting
+        run: tofu fmt -check -diff -recursive .
+
+  validate:
+    name: Validate ${{ matrix.path }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - modules/drcc-foundation
+          - modules/dspace-app-services
+          - modules/solr-search-cluster
+          - modules/repository-mcp-service
+          - examples/dspace-complete
+          - examples/foundation-only
+          - examples/with-solr
+          - examples/repository-mcp
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Initialize without backend
+        working-directory: ${{ matrix.path }}
+        run: tofu init -backend=false -input=false -no-color
+
+      - name: Validate configuration
+        working-directory: ${{ matrix.path }}
+        run: tofu validate -no-color
+
+  test:
+    name: Property tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: test/package-lock.json
+
+      - name: Install test dependencies
+        working-directory: test
+        run: npm ci
+
+      - name: Audit test dependencies
+        working-directory: test
+        run: npm audit --audit-level=high
+
+      - name: Run tracked property tests
+        working-directory: test
+        run: >-
+          npm test --
+          property1-external-arn-dependencies.test.ts
+          property2-terraform-validation.test.ts
+          property3-no-hardcoded-org-values.test.ts
+
+  docs:
+    name: Terraform docs drift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Regenerate module documentation
+        uses: terraform-docs/gh-actions@6de6da0cefcc6b4b7a5cbea4d79d97060733093c # v1.4.1
+        with:
+          working-dir: .
+          output-file: README.md
+          output-method: inject
+          recursive: true
+          recursive-path: modules
+          git-push: false
+
+      - name: Fail on documentation drift
+        run: git diff --exit-code -- modules/*/README.md
+
+  security:
+    name: Trivy configuration scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Scan infrastructure configuration
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: table
+          hide-progress: true
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          skip-dirs: .terraform,test/node_modules

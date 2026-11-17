@@ -13,9 +13,6 @@ locals {
   public_subnet_ids  = var.create_vpc ? aws_subnet.public[*].id : var.public_subnet_ids
   private_subnet_ids = var.create_vpc ? aws_subnet.private[*].id : var.private_subnet_ids
 
-  # Database configuration
-  db_secret_arn_final = var.deploy_database ? aws_secretsmanager_secret.db[0].arn : var.db_credentials_secret_arn_override
-
   # ALB logging configuration
   alb_log_prefix = "dspace-alb"
 }

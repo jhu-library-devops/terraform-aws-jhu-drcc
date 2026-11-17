@@ -217,7 +217,7 @@ variable "dspace_admin_last_name" {
 }
 
 variable "dspace_admin_password" {
-  description = "Password for the initial DSpace administrator account. Must be changed after first login."
+  description = "Deprecated and not injected into task definitions. Store the initial administrator password in Secrets Manager and set dspace_admin_password_secret_arn."
   type        = string
   default     = null
   sensitive   = true
@@ -306,19 +306,19 @@ variable "dspace_ui_url_ssm_arn" {
 }
 
 variable "dspace_db_url_ssm_arn" {
-  description = "ARN of SSM parameter containing database URL"
+  description = "Legacy SSM parameter ARN containing the database URL, used only when no database credentials secret is configured"
   type        = string
   default     = null
 }
 
 variable "dspace_db_username_ssm_arn" {
-  description = "ARN of SSM parameter containing database username"
+  description = "Legacy SSM parameter ARN containing the database username, used only when no database credentials secret is configured"
   type        = string
   default     = null
 }
 
 variable "dspace_db_password_ssm_arn" {
-  description = "ARN of SSM parameter containing database password"
+  description = "Legacy SSM parameter ARN containing the database password, used only when no database credentials secret is configured"
   type        = string
   default     = null
 }
@@ -494,7 +494,7 @@ variable "db_instance_identifier" {
 }
 
 variable "db_credentials_secret_arn_override" {
-  description = "The ARN of an existing Secrets Manager secret containing database credentials."
+  description = "ARN of an existing Secrets Manager JSON secret containing url, username, password, host, port, and dbname fields. Used by module-managed DSpace tasks and initialization when deploy_database is false."
   type        = string
   default     = null
 }

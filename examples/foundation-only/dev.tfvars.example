@@ -13,7 +13,10 @@
 # --- Identity ---
 # organization = "jhu"                       # [OPTIONAL] Default: "jhu"
 # project_name = "dspace"                    # [OPTIONAL] Default: "dspace"
-environment    = "dev"                       # [REQUIRED] Environment name
+environment            = "dev"                    # [REQUIRED] Environment name
+public_domain           = "foundation-dev.example.edu" # [REQUIRED] HTTPS listener domain
+create_ssl_certificate = false
+ssl_certificate_arn     = "arn:aws:acm:us-east-1:123456789012:certificate/replace-me"
 
 # --- VPC (OPTIONAL) ---
 # Defaults: 10.0.0.0/16 with 3 public + 3 private subnets.
@@ -21,9 +24,3 @@ environment    = "dev"                       # [REQUIRED] Environment name
 # vpc_cidr             = "10.2.0.0/16"
 # public_subnet_cidrs  = ["10.2.1.0/24", "10.2.2.0/24"]
 # private_subnet_cidrs = ["10.2.11.0/24", "10.2.12.0/24"]
-
-# --- Database (OPTIONAL) ---
-# Defaults: db.t3.micro, 20 GB. Suitable for development.
-# Uncomment to override:
-# db_instance_class    = "db.t3.small"
-# db_allocated_storage = 50
